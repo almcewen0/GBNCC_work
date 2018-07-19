@@ -1,7 +1,7 @@
 # (Not-so-)Simple script to find GBNCC beams on zuul and, optionally, process with PRESTO     ###
 # Processing requires environment set-up before script execution
 # Can make plot of beams (observed, detected, and unobserved) as beamcheck_PSR.png
-# Write out information about pulsars found as GBNCC_ATNF_beamcheck_[comp]_[n].txt
+# Write out information about pulsars found as GBNCC_ATNF_beamcheck_[comp]_[n].txt (or [outrt]_[comp]_[n].txt)
 # Combine results from multiple computer systems with combine_beamcheck.py
 # Make individual summaries with GBNCC_individual_summaries.py
 # Make nice plots of profiles with GBNCC_profile_plots.py
@@ -193,7 +193,8 @@ if "ra_psr" in args:
     ra_psr = args["ra_psr"]
     dec_psr = args["dec_psr"]
     psr=str(coord.SkyCoord(ra_psr,dec_psr,unit=('hourangle','deg')).to_string('hmsdms').strip('s'))
-    psr_name = "J%s%s%s%s" %(psr.split()[0].split('h')[0], psr.split()[0].split('h')[1].split('m')[0], psr.split()[1].split('d')[0], psr.split()[1].split('d')[1].split('m')[0])
+    psr_name = "J%s%s%s%s" %(psr.split()[0].split('h')[0], psr.split()[0].split('h')[1].split('m')[0],\
+	 psr.split()[1].split('d')[0], psr.split()[1].split('d')[1].split('m')[0])
 
 
 renee_dir = "/users/rspiewak/pulsars/"
@@ -233,20 +234,26 @@ if not file_psr is None:
     p_coord=[]
     try:
         for i in range(len(np.genfromtxt(file_psr,usecols=[0]))):
-    	    pulsar_list.append(Pulsar(np.genfromtxt(file_psr,dtype={'names':('name','ra','dec','period','period derivative','dm'),'formats':('S10','S16','S16','<f8','S15','S10')},usecols=[1,2,3,4,5,6])[i]))   
+    	    pulsar_list.append(Pulsar(np.genfromtxt(file_psr,dtype={'names':('name','ra','dec','period','period derivative','dm'),\
+		'formats':('S10','S16','S16','<f8','S15','S10')},usecols=[1,2,3,4,5,6])[i]))   
             try:
 	        pulsar_list[i].ra.split(':')[1]
-	        pulsar_list[i]=Pulsar((pulsar_list[i].name,coord.SkyCoord(pulsar_list[i].pos,unit=('hourangle','deg')).ra.value,coord.SkyCoord(pulsar_list[i].pos,unit=('hourangle','deg')).dec.value,pulsar_list[i].p0,pulsar_list[i].p1,pulsar_list[i].dm))
+	        pulsar_list[i]=Pulsar((pulsar_list[i].name,coord.SkyCoord(pulsar_list[i].pos,unit=('hourangle','deg')).ra.value,\
+		    coord.SkyCoord(pulsar_list[i].pos,unit=('hourangle','deg')).dec.value,pulsar_list[i].p0,pulsar_list[i].p1,pulsar_list[i].dm))
             except:
-                pulsar_list[i]=Pulsar(np.genfromtxt(file_psr,dtype={'names':('name','ra','dec','period','period derivative','dm'),'formats':('S10','<f8','<f8','<f8','S15','S10')},usecols=[1,2,3,4,5,6])[i])
+                pulsar_list[i]=Pulsar(np.genfromtxt(file_psr,dtype={'names':('name','ra','dec','period','period derivative','dm'),
+		    'formats':('S10','<f8','<f8','<f8','S15','S10')},usecols=[1,2,3,4,5,6])[i])
             num_north+=int(pulsar_list[i].north)
     except:
-	pulsar_list.append(Pulsar(np.loadtxt(file_psr,dtype={'names':('name','ra','dec','period','period derivative','dm'),'formats':('S10','S10','S10','<f8','S15','S10')},usecols=[1,2,3,4,5,6],ndmin=1)[0]))
+	pulsar_list.append(Pulsar(np.loadtxt(file_psr,dtype={'names':('name','ra','dec','period','period derivative','dm'),
+	    'formats':('S10','S10','S10','<f8','S15','S10')},usecols=[1,2,3,4,5,6],ndmin=1)[0]))
         try:
 	    pulsar_list[0].ra.split(':')[1]
-	    pulsar_list[0]=Pulsar((pulsar_list[0].name,coord.SkyCoord(pulsar_list[0].pos,unit=('hourangle','deg')).ra.value,coord.SkyCoord(pulsar_list[0].pos,unit=('hourangle','deg')).dec.value,pulsar_list[0].p0,pulsar_list[0].p1,pulsar_list[0].dm))
+	    pulsar_list[0]=Pulsar((pulsar_list[0].name,coord.SkyCoord(pulsar_list[0].pos,unit=('hourangle','deg')).ra.value,\
+		coord.SkyCoord(pulsar_list[0].pos,unit=('hourangle','deg')).dec.value,pulsar_list[0].p0,pulsar_list[0].p1,pulsar_list[0].dm))
 	except:
-	    pulsar_list[0]=Pulsar((pulsar_list[0].name,float(pulsar_list[0].ra),float(pulsar_list[0].dec),float(pulsar_list[0].p0),pulsar_list[0].p1,pulsar_list[0].dm))
+	    pulsar_list[0]=Pulsar((pulsar_list[0].name,float(pulsar_list[0].ra),float(pulsar_list[0].dec),\
+		float(pulsar_list[0].p0),pulsar_list[0].p1,pulsar_list[0].dm))
 	num_north+=int(pulsar_list[0].north)
     print "%d/%d pulsars in survey area. Finding closest beams..." %(num_north,len(pulsar_list))
     if num_north==0:
@@ -473,8 +480,10 @@ for psr in pulsar_list:
 			    rfi_opt = " -zapchan 2470:3270"
 			else:
 			    rfi_opt = " "
-			if len(glob('%s%s_temp/*%s*%s*rfifind.mask' %(work_dir,psr.name,beam_cand.mjd,beam_cand.num)))==0 or len(glob('%s%s_temp/*%s*%s*rfifind.stats' %(work_dir,psr.name,beam_cand.mjd,beam_cand.num)))==0:
-			    if len(glob(data_dir+'amcewen/mask_files/*%s*%s*rfifind.mask' %(beam_cand.mjd,beam_cand.num)))==0 or len(glob(data_dir+'amcewen/mask_files/*%s*%s*rfifind.stats' %(beam_cand.mjd,beam_cand.num)))==0:
+			if len(glob('%s%s_temp/*%s*%s*rfifind.mask' %(work_dir,psr.name,beam_cand.mjd,beam_cand.num)))==0 \
+				or len(glob('%s%s_temp/*%s*%s*rfifind.stats' %(work_dir,psr.name,beam_cand.mjd,beam_cand.num)))==0:
+			    if len(glob(data_dir+'amcewen/mask_files/*%s*%s*rfifind.mask' %(beam_cand.mjd,beam_cand.num)))==0 \
+				or len(glob(data_dir+'amcewen/mask_files/*%s*%s*rfifind.stats' %(beam_cand.mjd,beam_cand.num)))==0:
 			    	    mask_dir=glob(data_dir+'20*/*%s*GBNCC%s*' %(beam_cand.mjd,beam_cand.num))[0].split('/')[5] 
 				    if len(glob(data_dir+mask_dir+'/*rfi*tar*'))>0:
 					print "untarring mask file"
@@ -488,7 +497,8 @@ for psr in pulsar_list:
 					sproc.call('cp *%s*GBNCC%s*rfifind.stats %s*%s*/' %(beam_cand.mjd,beam_cand.num,work_dir,psr.name),shell=True)
 					os.chdir(work_dir+'%s_temp' %psr.name)
 				    else:
-				        if len(glob('*_%s_%s_rfifind.stats' %(beam_cand.mjd,beam_cand.num))) == 0 or len(glob('*_%s_%s_rfifind.mask' %(beam_cand.mjd,beam_cand.num))) == 0:
+				        if len(glob('*_%s_%s_rfifind.stats' %(beam_cand.mjd,beam_cand.num))) == 0\
+						or len(glob('*_%s_%s_rfifind.mask' %(beam_cand.mjd,beam_cand.num))) == 0:
 					    print "Running rfifind for %s beam candidate %s..." %(psr.name,beam_cand.num)
 					    rfi_out = open('rfifind_%s_%s_output.txt' %(beam_cand.mjd,beam_cand.num),'w')
 					    rfi_out.write("nice rfifind %s%s%s -o %s_%s_%s %s"
@@ -671,7 +681,8 @@ for psr in pulsar_list:
 			    snr_found.append(snr_beam)
 			    S_found.append(S_offset)
 			    dS_found.append(dS_offset)
-    			    summary_file.write("%10s\t %8s \t %8s \t %.4f \t %8s \t %8s \t %.7f \t  %5d  \t %7.3f\t %7.3f\t   %7.3f    \t %7.3f    \t" %(psr.name,psr.ra,psr.dec,psr.p0,psr.p1,psr.dm,beam_cand.off,MJD_beam,snr_exp,snr_beam,S_offset,dS_offset))
+    			    summary_file.write("%10s\t %8s \t %8s \t %.4f \t %8s \t %8s \t %.7f \t  %5d  \t %7.3f\t %7.3f\t   %7.3f    \t %7.3f    \t" \
+				%(psr.name,psr.ra,psr.dec,psr.p0,psr.p1,psr.dm,beam_cand.off,MJD_beam,snr_exp,snr_beam,S_offset,dS_offset))
 			    if snr_beam > snr_min:
 				print "PSR %s detected in beam #%s on MJD %d with S/N of %.3f; expected S/N %.3f" \
 				    %(psr.name, beam_cand.num, MJD_beam, snr_beam, snr_exp)
@@ -738,7 +749,8 @@ for psr in pulsar_list:
 			dS_found.append(1.0)
 		else:
 		    print "Cannot find beam #%s on %s for PSR %s" %(beam_cand.num, use_comp, psr.name)
-		    summary_file.write("%10s\t %8s \t %8s \t %.4f \t %8s \t %8s \t  %.7f  \tBeam #%6s Not Found\n" %(psr.name,psr.ra,psr.dec,psr.p0,psr.p1,psr.dm,beam_cand.off,beam_cand.num))
+		    summary_file.write("%10s\t %8s \t %8s \t %.4f \t %8s \t %8s \t  %.7f  \tBeam #%6s Not Found\n" \
+			%(psr.name,psr.ra,psr.dec,psr.p0,psr.p1,psr.dm,beam_cand.off,beam_cand.num))
 		    ra_unobs.append(ra_pointings[int(beam_cand.num)])
 		    dec_unobs.append(dec_pointings[int(beam_cand.num)])
 		    name_unobs.append(psr.name)
