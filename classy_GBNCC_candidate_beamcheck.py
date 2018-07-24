@@ -30,6 +30,7 @@
 # --par       Provide par file or directory in which par file is stored (if the latter, par file is assumed to be [pulsarJname].par 
 # --rew	      Reprocess, i.e. delete previous output
 # --outrt     Set root for output file (default is GBNCC_ATNF_beamcheck)
+# --dmsearch  Search DMs with prepfold
 
 #########################################################
 
@@ -102,6 +103,7 @@ NUMBER, JNAME, RA, DEC, P0, P1, DM)")
     pars.add_argument("--par",action="store",help="parameter file or directory in which parameter file is stored")
     pars.add_argument("--rew",action="store_true",dest="rewrite",help="delete old output and rewrite")
     pars.add_argument("--outrt",action="store",dest="outputroot",help="root for name of summary file")
+    pars.add_argument("--dmsearch",action="store_true",dest="dmsearch",help="search DMs with prepfold")
     args = vars(pars.parse_args())
 
     if args['pos'] != None and len(args["pos"].split()) > 1:
@@ -155,15 +157,20 @@ class Beam:
 		self.name=beam
 		self.num=beam.strip('GBNCC')
 		self.mask=''
+                self.maskfrac='0.0'
 		self.fits=''
 		self.ra=t[t['pointing']==beam]['RAdeg']
 		self.dec=t[t['pointing']==beam]['Decdeg']
 		self.pos="%s %s" %(self.ra,self.dec)
 	def add_mask(self,mask):
 		self.mask=mask	
+                if self.name in t2['pointing']:
+                    self.maskfrac=t2[t2['pointing']==self.name]['mask_frac'][0]
+        def mask_frac(self,frac):
+                self.maskfrac=float(frac)
 	def add_fits(self,fits):
 		self.fits=fits
-		self.mjd=self.fits.split('_')[1]
+		self.mjd=int(self.fits.split('_')[1])
 	def ang_off(self,ra,dec):
 		self.off=ang_offset(self.ra,self.dec,ra,dec)
 
@@ -222,11 +229,12 @@ if not os.path.isfile('./GBNCC_pointings.fits'):
 	t.add_column(Column(s.dec,name='Decdeg'))
 	t.write('GBNCC_pointings.fits')
 t=Table.read('GBNCC_pointings.fits')
+t2=Table.read('/users/amcewen/GBNCC_work/GBNCC_mask_fraction.fits')
 ra_pointings=np.array(t['RAdeg'])
 dec_pointings=np.array(t['Decdeg'])
 
 num_north=0
-beam_rejects = np.array([19906,20312,13691,17237,19064,72172,80142,83626,114632,115242,120582])
+beam_rejects = np.array([20051,19907,10451,19906,20312,13691,17237,19064,72172,80142,83626,114632,115242,120582])
 pulsar_list=[]
 
 # Check file information (assumes order of data in file)
@@ -447,13 +455,9 @@ for psr in pulsar_list:
 		if len(fits_list) > 0:
 		    ra_cand = ra_pointings[int(beam_cand.num)]
 		    dec_cand = dec_pointings[int(beam_cand.num)]
-		    MJD_beam = int(fits_list[0].split('/')[-1].split('_')[1])
 		    ra_found.append(ra_cand)
 		    dec_found.append(dec_cand)
-#		    name_found.append(psr.name)
-#		    dist_found.append(beam_cand.off)
 		    beam_found.append(beam_cand.num)
-#		    MJD_found.append(MJD_beam)
 		    # Process files to find detections
 		    if proc_psr == True:
 			if os.getcwd() != work_dir+'%s_temp' %psr.name:
@@ -469,14 +473,13 @@ for psr in pulsar_list:
 			    continue
 			A = sproc.Popen(["ls gu*G????%s_*fits" %beam_cand.num], stdout=sproc.PIPE, shell=True)
 			beam_cand.add_fits(A.communicate()[0])
-			scan_beam = int(beam_cand.fits.split('_')[3])
 			rfi_std = "-time 1 -timesig 2 -freqsig 3"
 			if "2bit" in beam_cand.fits and rfi_fil == True:
 			    raw_opt = " -noscales -noweights"
 			    rfi_std = "-time 1 -freqsig 3"
 			else:
 			    raw_opt = " "
-			if MJD_beam > 56710 and rfi_fil == True:
+			if beam_cand.mjd > 56710 and rfi_fil == True:
 			    rfi_opt = " -zapchan 2470:3270"
 			else:
 			    rfi_opt = " "
@@ -532,23 +535,32 @@ for psr in pulsar_list:
 			print "mask file located"
 			mask_file=glob('*%s*%s*rfifind.mask' %(beam_cand.mjd,beam_cand.num))[0]				
 			beam_cand.add_mask(mask_file)
-			if os.path.isfile('rfifind_%s_%s_output.txt' %(beam_cand.mjd,beam_cand.num)):
-			    B = sproc.Popen(["grep 'good' rfifind_%s_%s_output.txt | awk '{ print $6 }'"
-					     %(beam_cand.mjd,beam_cand.num)],stdout=sproc.PIPE,shell=True).communicate()[0]
-			    if B == '' and MJD_beam < 56710:
-				bandwidth = 90.0
-			    elif B == "" and MJD_beam > 56710:
-				bandwidth = 75.0
-			    elif len(B) < 4:
-				proc_psr = False
-				bandwidth = 0.0
-			    else:
-				bandwidth = float(B[1:-3])
+			if beam_cand.maskfrac != '':
+			    bandwidth=100.*(1-beam_cand.maskfrac)
+#"""
+#			if os.path.isfile('rfifind_%s_%s_output.txt' %(beam_cand.mjd,beam_cand.num)):
+#			    B = sproc.Popen(["grep 'good' rfifind_%s_%s_output.txt | awk '{ print $6 }'"
+#					     %(beam_cand.mjd,beam_cand.num)],stdout=sproc.PIPE,shell=True).communicate()[0]
+#			    if B == '' and beam_cand.mjd < 56710:
+#				bandwidth = 90.0
+#			    elif B == "" and beam_cand.mjd > 56710:
+#				bandwidth = 75.0
+#			    elif len(B) < 4:
+#				proc_psr = False
+#				bandwidth = 0.0
+#			    else:
+#				bandwidth = float(B[1:-3])
+#			else:
+#			    bandwidth = 90.0
+#"""
+			if "dmsearch" not in args:
+			    flag_search = '-nosearch'
+		 	    if (len(psr.name) < 10 and psr.p0 < 0.1):
+			        flag_search = '-nodmsearch'
+			elif len(psr.name) < 10 and psr.p0 < 0.1:
+			    flag_search=""
 			else:
-			    bandwidth = 90.0
-			flag_search = '-nosearch'
-			if len(psr.name) < 10 and psr.p0 < 0.1:
-			    flag_search = '-nodmsearch'
+			    flag_search="-nopsearch"
 			nintx = 64
 			if psr.p0 > 0.5:
 			    nintx = 16
@@ -579,8 +591,6 @@ for psr in pulsar_list:
 			    prof_cand = glob("guppi*%s*%s*.bestprof" %(beam_cand.mjd,beam_cand.num))
 			if len(prof_cand) == 0 and proc_psr == True:
 			    print "Attempting to fold %s with simple parameters..." %psr.name
-			    if psr.p0 < 0.1 or len(psr.name) < 10:
-				flag_search = "-nodmsearch"
 			    if os.path.isfile("prepfold_%s_%s_output.txt" %(beam_cand.mjd,beam_cand.num)):
 				sproc.call("rm prepfold_%s_%s_output.txt" %(beam_cand.mjd,beam_cand.num), shell=True)
 			    fold_out = open('prepfold_%s_%s_output.txt' %(beam_cand.mjd,beam_cand.num),'w')
@@ -654,6 +664,13 @@ for psr in pulsar_list:
 			    P = len(val)+0.0
 			    sig = val[lim].std()
 			    lim_flux = psr_flux == psr.name
+			    if beam_cand.maskfrac == '':
+				frac_num = float(sproc.Popen(["cat prepfold_%s_%s_output.txt | grep points | awk -F'= ' '{print $2}'| head -2 | tail -1" \
+				    %(beam_cand.mjd,beam_cand.num)],stdout=sproc.PIPE,shell=True).communicate()[0][0:-1])
+				frac_denom =  float(sproc.Popen(["cat prepfold_%s_%s_output.txt | grep points | awk -F'= ' '{print $2}'| head -1" \
+				    %(beam_cand.mjd,beam_cand.num)],stdout=sproc.PIPE,shell=True).communicate()[0][0:-1])
+				beam_cand.mask_frac(frac_num/frac_denom)
+				bandwidth=100.*(1-beam_cand.maskfrac)
 			    if (not psr.name in psr_flux) or s350_flux[lim_flux][0]<=0:
 				snr_exp = -10.0
 			    else:
@@ -682,10 +699,10 @@ for psr in pulsar_list:
 			    S_found.append(S_offset)
 			    dS_found.append(dS_offset)
     			    summary_file.write("%10s\t %8s \t %8s \t %.4f \t %8s \t %8s \t %.7f \t  %5d  \t %7.3f\t %7.3f\t   %7.3f    \t %7.3f    \t" \
-				%(psr.name,psr.ra,psr.dec,psr.p0,psr.p1,psr.dm,beam_cand.off,MJD_beam,snr_exp,snr_beam,S_offset,dS_offset))
+				%(psr.name,psr.ra,psr.dec,psr.p0,psr.p1,psr.dm,beam_cand.off,beam_cand.mjd,snr_exp,snr_beam,S_offset,dS_offset))
 			    if snr_beam > snr_min:
 				print "PSR %s detected in beam #%s on MJD %d with S/N of %.3f; expected S/N %.3f" \
-				    %(psr.name, beam_cand.num, MJD_beam, snr_beam, snr_exp)
+				    %(psr.name, beam_cand.num, beam_cand.mjd, snr_beam, snr_exp)
         		        summary_file.write("Detected in Beam #%6s\n" %beam_cand.num)
 				ra_detect.append(ra_cand)
 				dec_detect.append(dec_cand)
@@ -696,7 +713,7 @@ for psr in pulsar_list:
 				    sproc.call('mkdir detection_plots',shell=True)
 				    os.chdir(psr.name+"_temp/")
 				pfd_str = "detection_plots/guppi_%d_GBNCC%s_%s.pfd" \
-					  %(MJD_beam,beam_cand.num,psr.name)
+					  %(beam_cand.mjd,beam_cand.num,psr.name)
 				if len(glob('../%s.*' %pfd_str))==0:
 				    if len(glob('g*%s*%s*2bit*ps' %(beam_cand.mjd,beam_cand.num))) > 0:
 					file_str = "%s*%s*2bit" %(beam_cand.mjd,beam_cand.num)
