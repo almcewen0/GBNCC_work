@@ -1,0 +1,12 @@
+#@ Using S/N > 6 for detection threshold on zuul
+#@ Using beams within 0.5 deg of pulsars from tmp
+#@ Only searched for published pulsars
+#@ Flux adjusted for offset from beam center
+#@ S/Ne = Expected S/N estimated from published flux values using width calculated from data;     S/Nc = expected S/N calculated using catalog W50; S/Ns = S/N calulated using Weff (smeared out); S/Nm = measured S/N 
+#@ Flux estimated from measured S/N, uncertainty estimated from dependencies
+#@ File generated 2018-08-03 15:46:22 (ET)
+#@ DM Searching - DMs is resulting DM from search
+#@  PSRJ  	 RA 	 Dec 	 P0 	 DM 	 DMs 	 Dist  	 MJD     BW	 Pol 	 Spindx  	Temp 	Wdat  	Wcat 	Wsmr 	 S/Ne 	 S/Nc 	S/Ns	S/Nm 	   Flux		dFlux		Status 
+#@		(deg)	 (deg) 	 (s) 	 (p/cc)	 (p/cc)	 (deg)	 (day)	(MHz)	 (num)		 (K) 	 	(bins) 	(bins) 	(bins) 					   (mJy)	(mJy)  
+J0030+0451  	 7.614 	 4.861 	 0.004 	 4.332 	 4.336 	 0.086 	 58229 	 71.1 	 2 	 -1.9 	 55.92 	 11. 	 * 	 * 	 85.057	 *	*	43.338	   5.2085    	 1.6489    	Detected in Beam # 69542
+J0030+0451  	 7.614 	 4.861 	 0.004 	 4.332 	 4.332 	 0.435 	 58229 	 71.1 	 2 	 -1.9 	 55.92 	 8.0 	 * 	 * 	 26.875	 *	*	13.510	   5.1387    	 0.4654    	Detected in Beam # 69919
