@@ -4,7 +4,7 @@
 #@ S/Ne = Expected S/N estimated from published flux values using width calculated from data; S/Nc = expected S/N calculated using catalog W50; S/Ns = S/N calulated using Weff (smeared out); S/Nm = measured S/N 
 #@ Flux estimated from measured S/N, uncertainty estimated from dependencies
 #@ File generated 2018-08-01 17:39:08 (ET)
-#@   PSRJ  	 RA 	 Dec 	 P0 	 DM 	 Dist  	 MJD     BW	 Pol 	 Spindx  Temp 	Wdat  	Wcat 	Wsmr 	 S/Ne 	 S/Nc 	S/Ns	S/Nm 	   Flux		dFlux		Status 
+#   PSRJ  	 RA 	 Dec 	 P0 	 DM 	 Dist  	 MJD     BW	 Pol 	 Spindx  Temp 	Wdat  	Wcat 	Wsmr 	 S/Ne 	 S/Nc 	S/Ns	S/Nm 	   Flux		dFlux		Status 
 #@		 (deg)	 (deg) 	 (s) 	 (p/cc)	 (deg)	 (day)	(MHz)	 (num)		 (K) 	(bins) 	(bins) 	(bins) 					   (mJy)	(mJy)  
 J0002+6216  	 0.742 	 62.26 	 0.115 	 * 	 0.430 	 55199 	 95.2 	 1 	 * 	 122.2 	 1.0 	 * 	 * 	 *	 *	*	0.0	   0.0    	 0.0    	Not Detected in # 08534
 J0002+6216  	 0.742 	 62.26 	 0.115 	 * 	 0.242 	 55199 	 94.8 	 1 	 * 	 122.2 	 1.0 	 * 	 * 	 *	 *	*	2.5306	   0.3204    	 0.1643    	Not Detected in # 08678
