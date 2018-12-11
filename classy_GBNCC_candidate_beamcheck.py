@@ -8,29 +8,31 @@
 # Written by Renee Spiewak
 # Last edit Jun. 5, 2017
 
-# -h,--help   Print help page with flags listed
-# --pos        ra and dec in hh:mm:ss.ss (-)dd:mm:ss.ss form
-# -p          period in s
-# -pd         period derivative in s/s (default: 0)
-# --dm         DM in pc/cc
-# -f          file name (assumes file has columns of NUMBER, JNAME, RA (deg), DEC (deg), P0 (s), P1 (s/s), DM (cm^-3); include * in unknown ranges)
-# --beam       beam number as integer
-# -n          number of profile bins (default: 50)
-# --nsub       number of channels (default: 128) 
-# --npart      number of subintegrations (default: 40)
-# --angle      max angular offset between beam and pulsar in deg (default: 0.5 deg)
-# --snr        minimum S/N for detection (default: 6) 
-# --proc       process files (default: no processing)
-# --center        process central (original) beam
-# --comp       select computer system (only 'zuul' or 'GB' allowed)
-# --pub        Only process published pulsars
-# --rfi        Use Scott's options to remove RFI
-# -nonew      Do not copy new fits files into directories 
-# -o	      Choose output location (default is /lustre/cv/projects/GBNCC/amcewen)
-# --par       Provide par file or directory in which par file is stored (if the latter, par file is assumed to be [pulsarJname].par 
-# --rew	      Reprocess, i.e. delete previous output
-# --outrt     Set root for output file (default is GBNCC_ATNF_beamcheck)
-# --dmsearch  Search DMs with prepfold
+# -h,--help     Print help page with flags listed
+# --pos         ra and dec in hh:mm:ss.ss (-)dd:mm:ss.ss form
+# -p            period in s
+# -pd           period derivative in s/s (default: 0)
+# --dm          DM in pc/cc
+# -f            file name (assumes file has columns of NUMBER, JNAME, RA (deg), DEC (deg), P0 (s), P1 (s/s), DM (cm^-3); include * in unknown ranges)
+# --beam        beam number as integer
+# -n            number of profile bins (default: 50)
+# --nsub        number of channels (default: 128) 
+# --npart       number of subintegrations (default: 64)
+# --angle       max angular offset between beam and pulsar in deg (default: 0.5 deg)
+# --snr         minimum S/N for detection (default: 6) 
+# --proc        process files (default: no processing)
+# --center      process central (original) beam
+# --comp        select computer system (only 'zuul' or 'GB' allowed)
+# --pub         Only process published pulsars
+# --rfi         Use Scott's options to remove RFI
+# -nonew        Do not copy new fits files into directories 
+# -o	        Choose output location (default is /lustre/cv/projects/GBNCC/amcewen)
+# --par         Provide par file or directory in which par file is stored (if the latter, par file is assumed to be [pulsarJname].par 
+# --rew	        Reprocess, i.e. delete previous output
+# --outrt       Set root for output file (default is GBNCC_ATNF_beamcheck)
+# --psearch     Search period with prepfold
+# --dmsearch    Search DMs with prepfold
+# --ignorechans Provide file of channels to block for specific pulsars (assumes file has columns of JNAME, CHANS)
 
 #########################################################
 
@@ -43,6 +45,7 @@ import argparse as ap
 from astropy.coordinates import SkyCoord,Latitude,Longitude 
 from astropy.table import Table,Column
 from astropy import units as u, constants as c
+#import matplotlib.pyplot as plt
 
 # Function to find distance 
 def ang_offset(lon1,lat1,lon2,lat2):
@@ -50,6 +53,9 @@ def ang_offset(lon1,lat1,lon2,lat2):
 	y="%f %f" %(lon2,lat2)
 	return float(SkyCoord(x,unit=("deg","deg")).separation(SkyCoord(y,unit=("deg","deg")))/u.deg)
 
+# Function to cycle items in list (for calculating W50)
+def shift(l,n):
+    return l[n:]+l[:n]
 
 def proc_args():
     """
@@ -78,11 +84,11 @@ on known pulsars")
 NUMBER, JNAME, RA, DEC, P0, P1, DM)")
     pars.add_argument("--beam",action="store",
                       help="beam number as integer")
-    pars.add_argument("-n","--nbin",action="store",default=50,type=int,
+    pars.add_argument("-n","--nbin",action="store",default=200,type=int,
                       help="number of profile bins")
     pars.add_argument("--nsub",action="store",default=128,type=int,
                       help="number of channels")
-    pars.add_argument("--npart",action="store",default=40,type=int,
+    pars.add_argument("--npart",action="store",default=64,type=int,
                       help="number of subintegrations")
     pars.add_argument("--angle",action="store",default=0.5,type=float,
                       help="max offset between beam and pulsar in deg")
@@ -102,6 +108,8 @@ NUMBER, JNAME, RA, DEC, P0, P1, DM)")
     pars.add_argument("--rew",action="store_true",dest="rewrite",help="delete old output and rewrite")
     pars.add_argument("--outrt",action="store",dest="outputroot",help="root for name of summary file")
     pars.add_argument("--dmsearch",action="store_true",dest="dmsearch",help="search DMs with prepfold")
+    pars.add_argument("--psearch",action="store_true",dest="psearch",help="search period with prepfold")
+    pars.add_argument("--ignorechans",action="store",dest="igchn",help="file with channels to ignore")
     args = vars(pars.parse_args())
 
     if args['pos'] != None and len(args["pos"].split()) > 1:
@@ -132,6 +140,12 @@ class Pulsar:
 		self.w50flag=False
 		self.params=name,ra,dec,p0,p1,dm	
 		self.pos="%s %s" %(ra,dec)
+		self.specflgs=''
+		if name in specflgpsrs:
+		    flg=''
+		    for f in sproc.Popen("grep %s /users/amcewen/special_flags.txt" %name,shell=True,stdout=sproc.PIPE).communicate()[0].split()[1:]:
+			flg=flg+' '+f
+		    self.specflgs=flg
 		if len(cat_dat[cat_dat['name']==name]) != 0:
 		    if cat_dat[cat_dat['name']==name]['temp'] != '*':
 			self.temp=23+float(cat_dat[cat_dat['name']==name]['temp'])
@@ -146,7 +160,7 @@ class Pulsar:
 			tdm=8.3*10**6*float(dm)*df/cent_freq**3
 			ts=10**(-6.46+0.154*np.log10(float(dm))+1.07*(np.log10(float(dm)))**2-3.86*np.log10(float(cent_freq)/1000.))
 			self.wsmear=np.sqrt(float(self.w50)**2+ts**2+tdm**2)
-			self.wsmearb=float(self.wsmear)/(20.*self.p0)
+			self.wsmearb=float(self.wsmear)/(5.*self.p0)
 		    else:
 			self.wsmear='*'
 			self.wsmearb='*'
@@ -177,7 +191,7 @@ class Pulsar:
                     tdm=8.3*10**6*float(dm)*df/cent_freq**3
                     ts=10**(-6.46+0.154*np.log10(float(dm))+1.07*(np.log10(float(dm)))**2-3.86*np.log10(float(cent_freq)/1000.))
                     self.wsmear=np.sqrt(float(self.w50)**2+ts**2+tdm**2)
-                    self.wsmearb=float(self.wsmear)/(20.*self.p0)
+                    self.wsmearb=float(self.wsmear)/(5.*self.p0)
 		    self.s350='*'
 		    self.s400='*'
 		    self.s1400='*'
@@ -189,8 +203,8 @@ class Pulsar:
 
 	def change_bins(self,nbins):
 		if self.w50 != '*':
-		    self.w50b=float(self.w50b)*nbins/50.
-		    self.wsmearb=float(self.wsmearb)*nbins/50.		
+		    self.w50b=float(self.w50b)*nbins/200.
+		    self.wsmearb=float(self.wsmearb)*nbins/200.		
 	def beam_numbers(self):
 		Str=''
 		for i in self.beams:
@@ -244,7 +258,9 @@ par_file = args["par"]
 rewrite = args["rewrite"]
 outrt = args["outputroot"]
 dmsearch = args["dmsearch"]
+psearch = args["psearch"]
 nonew = args["nonew"]
+igchn = args["igchn"]
 
 # Create name of pulsar from command line input
 if "ra_psr" in args:
@@ -255,9 +271,9 @@ if "ra_psr" in args:
 	 psr.split()[1].split('d')[0], psr.split()[1].split('d')[1].split('m')[0])
 
 # Running code with --dmsearch and not --rew will pull "new DM" from old data that did not neccesarily search DMs
-if dmsearch and not rewrite:
+if (dmsearch or psearch) and not rewrite:
     print ""
-    print "WARNING: DM searching is on, but rewrite is not. Previously calculated data will not be recreated with -dmsearch."
+    print "WARNING: Searching is on, but rewrite is not. Previously calculated data will not be recreated with search flag(s)."
     resp = raw_input("Change rewrite flag (--rew) to True (y/n)?\n")
     if resp == 'y':
 	args["rewrite"] = True
@@ -268,6 +284,34 @@ renee_dir = "/users/rspiewak/pulsars/"
 cent_freq=350. #MHz
 df=0.0244140625  #MHz
 yflg=False
+
+tskypath = glob('/users/amcewen/GBNCC_work/tsky.ascii')[0]	# method for calculating Haslam sky temperature
+tskylist=[]
+with open(tskypath) as f:
+    for line in f:
+	str_idx=0
+	while str_idx<len(line):
+	    temp_string=line[str_idx:str_idx+5]
+	    try:
+		tskylist.append(float(temp_string))
+	    except:
+		pass
+	    str_idx+=5
+
+def tskypy(ra,dec):
+    b=SkyCoord(ra,dec,unit=('deg','deg')).transform_to('galactic').b.value
+    l=SkyCoord(ra,dec,unit=('deg','deg')).transform_to('galactic').l.value
+    if l<0:
+	l=360.+l
+    j=b+90.5
+    if j>179:
+	j=179
+    nl=l-0.5
+    if l<0.5:
+	nl=359
+    i=float(nl)/4.
+    tsky_haslam=tskylist[180*int(i)+int(j)]
+    return tsky_haslam*(350/408.0)**(-2.6)
 
 if "out" in args:
     work_dir = args["out"]
@@ -291,11 +335,10 @@ if not os.path.isfile('./GBNCC_pointings.fits'):
 	t.write('GBNCC_pointings.fits')
 pointings=Table.read('GBNCC_pointings.fits')
 mask_fractions=Table.read('/users/amcewen/GBNCC_work/GBNCC_mask_fraction.fits')
-cat_dat=Table.read('/users/amcewen/GBNCC_work/psrcat_v158_full.fits')
+cat_dat=Table.read('/users/amcewen/GBNCC_work/psrcat_v159_full.fits')
 
-#num_north=0
 beam_rejects = np.array([20051,19907,10451,19906,20312,13691,17237,19064,72172,80142,83626,114632,115242,120582])
-#pulsar_list=[]
+specflgpsrs=np.loadtxt('/users/amcewen/special_flags.txt',usecols=[0],dtype=str)
 
 print ""
 # Check file information (assumes order of data in file)
@@ -353,15 +396,15 @@ summary_file.write("#@ Flux estimated from measured S/N, uncertainty estimated f
 summary_file.write("#@ File generated %s (ET)\n" %strftime("%Y-%m-%d %H:%M:%S"))
 if dmsearch:
     summary_file.write('#@ DM Searching - DMs is resulting DM from search\n')
-    summary_file.write("#@  PSRJ  \t RA \t Dec \t P0 \t DM \t DMs \t Dist  \t MJD     BW\t Pol \t Spindx \
-Temp \tWdat  \tWcat \tWsmr \t S/Ne \t S/Nc \tS/Ns\tS/Nm \t   Flux\t\tdFlux\t\tStatus \n")
-    summary_file.write("#@\t\t(deg)\t (deg) \t (s) \t (p/cc)\t (p/cc)\t (deg)\t (day)\t(MHz)\t (num)\t\t (K) \
-\t(bins) \t(bins) \t(bins) \t\t\t\t\t   (mJy)\t(mJy)  \n")
+    summary_file.write("#@  PSRJ  \t RA \t Dec \t P0 \t\t DM \t DMs \t\t Dist  \t MJD     BW\t Spindx \
+Temp \t Wdat  \t\t Wcat \t Wsmr \t S/Ne \t S/Nc \tS/Ns\tS/Nm \t   Flux\t\tdFlux\t\tStatus \n")
+    summary_file.write("#@\t\t(deg)\t (deg) \t (s) \t\t (p/cc)\t (p/cc)\t\t (deg)\t (day)\t(MHz) \t\t (K) \
+\t (ms)  \t\t (ms)  \t  (ms)   \t\t\t\t   (mJy)\t(mJy)  \n")
 else:
-    summary_file.write("#@  PSRJ  \t RA \t Dec \t P0 \t DM \t Dist  \t MJD     BW\t Pol \t Spindx  \
+    summary_file.write("#@  PSRJ  \t RA \t Dec \t P0 \t\t DM \t Dist  \t MJD     BW\t Spindx  \
 Temp \tWdat  \tWcat \tWsmr \t S/Ne \t S/Nc \t S/Ns\tS/Nm \t   Flux\t\t dFlux\t\tStatus \n")
-    summary_file.write("#@\t\t(deg)\t (deg) \t (s) \t (p/cc)\t (deg)\t (day)\t(MHz)\t (num)\t\t (K) \
-\t(bins) \t(bins) \t(bins) \t\t\t\t\t   (mJy)\t (mJy)  \n")
+    summary_file.write("#@\t\t(deg)\t (deg) \t (s) \t\t (p/cc)\t (deg)\t (day)\t(MHz)\t\t (K) \
+\t(s)    \t(s)    \t(s)    \t\t\t\t\t   (mJy)\t (mJy)  \n")
 
 # Tracking number for final output
 name_detect = []
@@ -386,6 +429,8 @@ for i in range(len(psr_tbl[y])):
                     psr.beams.append(Beam(pointings[p_coord.separation(SkyCoord(pointings['RAdeg'],pointings['Decdeg']))<ang_max*u.deg]['pointing'][j]))
 	else: 
 	    psr.beams.append(Beam(pointings[p_coord.separation(SkyCoord(pointings['RAdeg'],pointings['Decdeg']))==p_coord.separation(SkyCoord(pointings['RAdeg'],pointings['Decdeg'])).min()][0][0]))
+    elif os.path.isfile(beam_psr):
+	psr.beams.append(Beam('GBNCC'+sproc.Popen("grep %s %s | awk '{print $2}'" %(psr.name,beam_psr),shell=True,stdout=sproc.PIPE).communicate()[0].split('\n')[0]))
     elif int(beam_psr) not in beam_rejects:
 	beam_psr='GBNCC'+beam_psr
 	psr.beams.append(Beam(beam_psr))
@@ -400,14 +445,12 @@ for i in range(len(psr_tbl[y])):
     if f_pub and unpub_psr:
 	continue     # Skip unpublished pulsars when flag used
     if psr.temp == '*':
-	psr.temp=(23+cat_dat[cat_dat['temp']!='*'][np.argsort(SkyCoord(psr.pos, \
-	    unit=('deg','deg')).separation(SkyCoord(cat_dat[cat_dat['temp']!='*']['RA'], \
-	    cat_dat[cat_dat['temp']!='*']['Dec'])))[:3]]['temp'].astype('float').mean())       # If no published temperature for pulsar, find average of three nearest known pointings 
+	psr.temp=tskypy(psr.ra,psr.dec)     #Calculate otherwise unknown sky temperature from Haslam paper
     if str(par_file) == "None":   # Unless a .par file/directory is given, search through repositories for match
 	if len(glob('%sparfiles/%s_short.par' %(renee_dir,psr.name)))>0:
 	    psr.par=glob('%sparfiles/%s_short.par' %(renee_dir,psr.name))[0]
 	if len(glob(data_dir+'amcewen/pars/%s*' %psr.name))>0:
-	    psr.par=glob(data_dir+'amcewen/pars/%s*' %psr.name)[0]
+	    psr.par=glob('/lustre/cv/projects/GBNCC/amcewen/pars/%s*' %psr.name)[0]
 	if psr.par == '' and len(psr.name)>=10:
 	    print "Cannot find par file in %sparfiles/ or in %samcewen/pars/" %(renee_dir,data_dir)
     else:   # Checking given .par file/directory
@@ -429,6 +472,7 @@ for i in range(len(psr_tbl[y])):
 	continue
     elif rewrite:
 	sproc.call("rm -r %s%s_temp" %(work_dir,psr.name),shell=True)
+	sproc.call("rm %sdetection_plots/*" %work_dir,shell=True)
 	os.mkdir("%s%s_temp" %(work_dir,psr.name))
     os.chdir("%s_temp/" %psr.name)
     if not os.path.isfile('%s_short.par' %psr.name) and not psr.par == '':      # Linking .par file to directory
@@ -450,23 +494,33 @@ for i in range(len(psr_tbl[y])):
 		        beam_cand.add_fits(i.split('/')[-1])
                 else:
                     print "Cannot find beam #%s on %s for PSR %s" %(beam_cand.num, use_comp, psr.name)
-                    summary_file.write("%-12s\t %-5.5s \t %-5.5s \t %-.5s \t %-.5s \t %-.5s \t * \t * \t * \t %-.4s \t %-.5s \t * \t * \t \
-%-.3s \t %-.3s \t * \t * \t  * \t   * \t\t *  \t\tBeam #%6s Not Found\n" \
-                    %(psr.name,psr.ra,psr.dec,psr.p0,psr.dm,beam_cand.off,psr.spindx,psr.temp,psr.w50b,psr.wsmearb,beam_cand.num))
+		    if dmsearch:
+                        summary_file.write("%-12s\t %-5.5s \t %-5.5s \t %-8.8s \t %-.5s \t * \t\t %-.5s \t * \t *  \t %-.4s \t %-.5s \t * \t\t * \t \
+%-.3s \t %-.3s \t * \t * \t  * \t   * \t\t *  \t\tBeam %6s Not Found\n" \
+                        %(psr.name,psr.ra,psr.dec,psr.p0,psr.dm,beam_cand.off,psr.spindx,psr.temp,psr.w50,psr.wsmear,beam_cand.num))
+		    else:
+		        summary_file.write("%-12s\t %-5.5s \t %-5.5s \t %-8.8s \t %-.5s \t %-.5s \t * \t * \t %-.4s \t %-.5s \t * \t\t * \t \
+%-.3s \t %-.3s \t * \t * \t  * \t   * \t\t *  \t\tBeam %6s Not Found\n" \
+                        %(psr.name,psr.ra,psr.dec,psr.p0,psr.dm,beam_cand.off,psr.spindx,psr.temp,psr.w50,psr.wsmear,beam_cand.num))
                     num_unobs += 1
                     os.chdir(work_dir)
                     continue
 
 	    else:
 		print "Cannot find beam #%s on %s for PSR %s" %(beam_cand.num, use_comp, psr.name)
-		summary_file.write("%-12s\t %-5.5s \t %-5.5s \t %-.5s \t %-.5s \t %-.5s \t * \t * \t * \t %-.4s \t %-.5s \t * \t * \t \
-%-.3s \t %-.3s \t * \t * \t  * \t   * \t\t * \t\tBeam #%6s Not Found\n" \
-		    %(psr.name,psr.ra,psr.dec,psr.p0,psr.dm,beam_cand.off,psr.spindx,psr.temp,psr.w50b,psr.wsmearb,beam_cand.num))
+		if dmsearch:
+		    summary_file.write("%-12s\t %-5.5s \t %-5.5s \t %-8.8s \t %-.5s \t * \t\t %-.5s \t * \t * \t %-.4s \t %-.5s \t * \t\t * \t \
+%-.3s \t %-.3s \t * \t * \t  * \t   * \t\t *  \t\tBeam %6s Not Found\n" \
+		    %(psr.name,psr.ra,psr.dec,psr.p0,psr.dm,beam_cand.off,psr.spindx,psr.temp,psr.w50,psr.wsmear,beam_cand.num))
+		else:
+		    summary_file.write("%-12s\t %-5.5s \t %-5.5s \t %-8.8s \t %-.5s \t %-.5s \t * \t * \t %-.4s \t %-.5s \t * \t\t * \t \
+%-.3s \t %-.3s \t * \t * \t  * \t   * \t\t * \t\tBeam %6s Not Found\n" \
+		    %(psr.name,psr.ra,psr.dec,psr.p0,psr.dm,beam_cand.off,psr.spindx,psr.temp,psr.w50,psr.wsmear,beam_cand.num))
 		num_unobs += 1
 		os.chdir(work_dir)
 		continue
 	else:
-	    for i in glob('*%s*fits' %beam_cand.name):
+	    for i in glob('guppi*%s*fits' %beam_cand.name):
 	        beam_cand.add_fits(i)
 	# Process files to find detections
 	rfi_std = "-time 1 -timesig 2 -freqsig 3"
@@ -510,9 +564,10 @@ for i in range(len(psr_tbl[y])):
 			rfi_out.flush()
 			rfi_out.close()
 			del p
-			sproc.call('rm *.bytemask *.inf *d.ps *.rfi', shell=True)
-		    sproc.call('ln -sf *%s*%s_*d.mask %samcewen/mask_files/' %(mjd,beam_cand.num,data_dir), shell=True)        # Put a link to the files in the mask repository
-		    sproc.call('ln -sf *%s*%s_*d.stats %samcewen/mask_files/' %(mjd,beam_cand.num,data_dir), shell=True) 
+			sproc.call("mv *%s*%s_*d.mask %samcewen/mask_files" %(mjd,beam_cand.num,data_dir),shell=True)
+                        sproc.call("mv *%s*%s_*d.stats %samcewen/mask_files" %(mjd,beam_cand.num,data_dir),shell=True)
+		    sproc.call('ln -sf %samcewen/mask_files/*%s*%s_*d.mask .' %(data_dir,mjd,beam_cand.num), shell=True)        # Move mask/stas files to the mask repository and link to them
+		    sproc.call('ln -sf %samcewen/mask_files/*%s*%s_*d.stats .' %(data_dir,mjd,beam_cand.num), shell=True) 
 	        else:													# Take mask/stats files from mask repository
 		    mask_dir=glob(data_dir+'amcewen/mask_files/*%s*%s_*rfifind.mask' %(mjd,beam_cand.num))[0]
 		    stats_dir=glob(data_dir+'amcewen/mask_files/*%s*%s_*rfifind.stats' %(mjd,beam_cand.num))[0]
@@ -522,38 +577,48 @@ for i in range(len(psr_tbl[y])):
 	    if len(beam_cand.fits) == len(beam_cand.maskfrac) and beam_cand.maskfrac[-1] != '':                 # Calculate mask fraction (if it isn't already reported in Will's file)
 	        bandwidth=100.*(1-beam_cand.maskfrac[-1])
 	    if not dmsearch:				 # Setting various prepfold flags 
-	        flag_search = '-nosearch'
-	        if (len(psr.name) < 10 and psr.p0 < 0.1):
+	        flag_search = '-nopsearch -nodmsearch'
+	        if (len(psr.name) < 10 and psr.p0 < 0.1) or psearch:
 		    flag_search = '-nodmsearch'
-	    elif len(psr.name) < 10 and psr.p0 < 0.1:
+	    elif (len(psr.name) < 10 and psr.p0 < 0.1) or psearch:
 	        flag_search=""
 	    else:
-	        flag_search="-nopsearch"
-	    nintx = 64
+		flag_search=""
+	    nintx = npart
 	    if psr.p0 > 0.5:
 	        nintx = 16
-	    elif (psr.p0 > 0.1) or (psr.p0 > 0.5):
+	    elif psr.p0 > 0.1:
 	        nintx = 32
 	    nbinx = nbin
 	    if psr.p0 < 1.7e-3 and nbin > 18:
-	        nbinx = 16
-	    elif psr.p0 < 2.5e-3 and nbin > 20:
-	        nbinx = 20
-	    elif psr.p0 < 3.5e-3 and nbin > 30:
-	        nbinx = 30
-	    prep_str = "-n %d -nsub %d -npart %d -fine%s -mask %s -noxwin %s" \
+	        nbinx = 28
+	    elif psr.p0 < 1.0e-2 and nbin > 20:
+	        nbinx = 50
+	    elif psr.p0 < 5.0e-2 and nbin > 30:
+	        nbinx = 128
+	    prep_str = " -n %d -nsub %d -npart %d -fine%s -mask %s -noxwin %s" \
 	        %(nbinx, nsub, nintx, raw_opt, beam_cand.mask[-1], fits)
-	    if nbinx != 50:
+	    if str(igchn)!="None":
+		chans=sproc.Popen("grep %s %s | awk '{print $2}'" %(psr.name,igchn),shell=True,stdout=sproc.PIPE).communicate()[0].split('\n')[0]
+		if len(chans)!=0:
+		    prep_str="-ignorechan " +chans+prep_str
+	    if nbinx != 200:
 	        psr.change_bins(nbinx)		# Mask fraction initially calculated using 50 bins - if this isn't the case, this recalculates with the correct number
+	    flag_search = flag_search + psr.specflgs
 	    prof_cand = glob('guppi*%s*%s*.pfd.bestprof' %(mjd,beam_cand.num))
 	    if len(prof_cand) == 0 and psr.par != '':			# Begin prepfolding, first with a par file (if available), then with command line parameters
 	        print "Attempting to fold %s with par file..." %psr.name
 	        if len(glob("prepfold_%s_%s_output.txt"%(mjd,beam_cand.num))) > 0:
 		    sproc.call("rm prepfold_%s_%s_output.txt"%(mjd,beam_cand.num), shell=True)
 	        fold_out = open('prepfold_%s_%s_output.txt' %(mjd,beam_cand.num),'w')
-	        fold_out.write("prepfold -par %s %s %s"%(psr.par,flag_search,prep_str))
-	        p = sproc.Popen("prepfold -par %s %s %s"%(psr.par,flag_search,prep_str), 
-		    shell=True, stdout=fold_out)
+		if sproc.Popen(["grep PB %s" %psr.par],stdout=sproc.PIPE,shell=True).communicate()[0]=='':
+	            fold_out.write("prepfold -par %s -nopdsearch %s %s"%(psr.par,flag_search,prep_str))
+	            p = sproc.Popen("prepfold -par %s -nopdsearch %s %s"%(psr.par,flag_search,prep_str), 
+		        shell=True, stdout=fold_out)
+		else:
+		    fold_out.write("prepfold -par %s %s %s"%(psr.par,flag_search,prep_str))
+		    p = sproc.Popen("prepfold -par %s %s %s"%(psr.par,flag_search,prep_str),
+			shell=True, stdout=fold_out)
 	        p.wait()
 	        fold_out.flush()
 	        fold_out.close()
@@ -564,11 +629,14 @@ for i in range(len(psr_tbl[y])):
 	        if os.path.isfile("prepfold_%s_%s_output.txt" %(mjd,beam_cand.num)):
 		    sproc.call("rm prepfold_%s_%s_output.txt" %(mjd,beam_cand.num), shell=True)
 	        fold_out = open('prepfold_%s_%s_output.txt' %(mjd,beam_cand.num),'w')
-	        prepfold_parameters="prepfold -p %.11f " %psr.p0
-	        if psr.p1 != "*":
-		    prepfold_parameters=prepfold_parameters+"-pd %s " %psr.p1
+	        prepfold_parameters="prepfold -p %.11f -pd 0.0 -nopdsearch" %psr.p0
+		if dmsearch:
+		    flag_search = ""
+		else:
+		    flag_search = "-nodmsearch"
 	        if psr.dm != "*":
-		    prepfold_parameters=prepfold_parameters+"-dm %.3s " %psr.dm
+		    prepfold_parameters=prepfold_parameters+" -dm %.3s " %psr.dm
+		prepfold_parameters = prepfold_parameters + psr.specflgs
 	        fold_out.write(prepfold_parameters+" %s %s" 
 		    %(flag_search, prep_str))
 	        p = sproc.Popen(prepfold_parameters+" %s %s" 
@@ -584,6 +652,7 @@ for i in range(len(psr_tbl[y])):
 	    else:
 	        if dmsearch:                                    # Record the new DM if searching
 		    psr.newdm=sproc.Popen(["grep 'Best DM' prepfold_%s_%s_output.txt | awk '{print $6}'" %(mjd,beam_cand.num)],stdout=sproc.PIPE,shell=True).communicate()[0][0:-1]
+		    newdmerr=(psr.p0/nbinx)*(.35**3/100.)*(1/8.298e-6)			    # Calculate error on DM using bin resolution
 	        # Deal with multiple bestprof files
 	        best_prof_list = np.array(glob('gu*%s*%s*prof' %(mjd,beam_cand.num)))       # Finding the best_prof to use for calculation of flux and S/N
 	        if len(best_prof_list) == 1:
@@ -597,24 +666,66 @@ for i in range(len(psr_tbl[y])):
 		    sys.exit('No bestprof file found for %s' %psr.name)
 	        num, val = np.loadtxt(prof_file, dtype='float', unpack=True)          # Read profile information for flux analysis
 	        lim = val < val.mean()
-	        i = 0
-	        while i < 3:                        				      # Sigma clipping for calculation of pulse width; lim and lim2 covers off-pulse region
+		for i in range(3):
 		    lim2 = val < val[lim].mean()+2.5*val[lim].std()
 		    lim = val < val[lim2].mean()+2.5*val[lim2].std()
 		    if val[lim].std() == val[lim2].std():
 		        break
-		    i = i+1
-	        W = len(val)-len(val[lim])+0.0
+	        wren = len(val)-len(val[lim])+0.0
+		val=val-val[lim].mean()
+		hy=val.max()*0.5
+		rts=[]
+		if val[0]>hy or val[-1]>hy:
+		    val=val.tolist()
+		    lim=lim.tolist()
+		    lim2=lim2.tolist()
+                    val=shift(val,sum(val>hy)+1)
+                    lim=shift(lim,sum(val>hy)+1)
+		    lim2=shift(lim2,sum(val>hy)+1)
+		    val=np.array(val)
+		    lim=np.array(lim)
+		    lim2=np.array(lim2)
+		for i in range(len(val)-1):
+		    if i>0 and val[i]>hy:
+		        if val[i-1]<hy and val[i+1]<hy:
+	                    m=val[i]-val[i-1]
+        	            b=val[i]-m*num[i]-hy
+                	    rts.append(np.roots([m,b])[0])
+                	    m=val[i+1]-val[i]
+			    b=val[i]-m*num[i]-hy
+			    rts.append(np.roots([m,b])[0])
+		        elif val[i-1]<hy:
+			    m=val[i]-val[i-1]
+			    b=val[i]-m*num[i]-hy
+			    rts.append(np.roots([m,b])[0])
+		        elif val[i+1]<hy:
+			    m=val[i+1]-val[i]
+			    b=val[i]-m*num[i]-hy
+			    rts.append(np.roots([m,b])[0])
+		if len(rts)<2:
+		    W=1.0
+		elif len(rts)>len(val)*0.75:
+		    W=wren
+		else:
+		    W=0.0
+		    for i in range(len(rts)):
+		        if i%2==1:
+			    W+=rts[i]-rts[i-1]
 	        if W == 0.0:							      # If pulse width isn't found, set width to 1 bin (may need to adjust this)
 		    W = 1.0
-	        elif W > 1:
-		    high_val = num[val == val.max()][0]
-		    for i in range(len(lim)):					      # If there are single-bin gaps in the pulse width, fill in gaps
-		        if i != high_val and lim[i] == False and \
-			    lim[i-1] == True and lim[(i+1)%len(lim)] == True:
-			    lim[i] = True
-		    W = len(val)-len(val[lim])+0.0
+#	        elif W > 1:
+#		    high_val = num[val == val.max()][0]
+#		    for i in range(len(lim)):					      # If there are single-bin gaps in the pulse width, fill in gaps
+#		        if i != high_val and lim[i] == False and \
+#			    lim[i-1] == True and lim[(i+1)%len(lim)] == True:
+#			    lim[i] = True
+#		    W = len(val)-len(val[lim])+0.0
 	        P = len(val)+0.0
+		#plt.plot(num,val)
+		#plt.plot(num[lim],val[lim])
+		#for i in rts:
+		#    plt.axvline(x=i)
+		#plt.show()
 	        sig = val[lim].std()
 	        if len(beam_cand.fits) != len(beam_cand.maskfrac):					# if Will hasn't reported a mask fraction, calculate it using prepfold output
 		    frac_num = float(sproc.Popen(["grep points prepfold_%s_%s_output.txt | awk -F'= ' '{print $2}'| head -2 | tail -1" \
@@ -623,7 +734,7 @@ for i in range(len(psr_tbl[y])):
 		        %(mjd,beam_cand.num)],stdout=sproc.PIPE,shell=True).communicate()[0][0:-1])
 		    beam_cand.maskfrac.append(float(1-frac_num/frac_denom))
 		    bandwidth=100.*(1-beam_cand.maskfrac[-1])
-	        poln=float(sproc.Popen(["readfile %s | grep poln | awk '{print $5}'" %fits],stdout=sproc.PIPE,shell=True).communicate()[0][0]) # get polarization
+		poln=2
 	        if psr.s350 == '*':				# Calculate the S/N and flux density for the various pulse widths
 		    snr_exp = '*'
 	        else:
@@ -661,20 +772,22 @@ for i in range(len(psr_tbl[y])):
 	        elif snr_beam < snr_min and snr_beam >= 0.001 and beam_cand.off >= 0.79:
 		    S_offset = 100.0
 		    dS_offset = 100.0
-		out_str="%-12s\t %-5.5s \t %-5.5s \t %-.5s \t %-.5s " %(psr.name,psr.ra,psr.dec,psr.p0,psr.dm)
+		out_str="%-12s\t %-5.5s \t %-5.5s \t %-8.8s \t %-.5s " %(psr.name,psr.ra,psr.dec,psr.p0,psr.dm)
 	        if dmsearch:								# write output 
-		    out_str=out_str+"\t %-.5s " %(psr.newdm)
-		out_str=out_str+"\t %-.5s \t %-.5s \t %-.4s \t %-.1s \t %-.4s \t %-.5s \t %-.3s " %(beam_cand.off,mjd,bandwidth,poln,psr.spindx,psr.temp,W)
+		    out_str=out_str+"\t %-.5s(%.2f) " %(psr.newdm,newdmerr)
+		out_str=out_str+"\t %-.5s \t %-.5s \t %-.4s \t %-.4s \t %-.5s \t %-.7s " %(beam_cand.off,mjd,bandwidth,psr.spindx,psr.temp,W*psr.p0*1000./P)
 		if psr.w50flag:
-		    out_str=out_str+"\t %-.3s! \t %-.3s!" %(psr.w50b,psr.wsmearb)
-		else: 
-		    out_str=out_str+"\t %-.3s \t %-.3s" %(psr.w50b,psr.wsmearb)
+		    out_str=out_str+"\t %-.4s! \t %-.4s!" %(psr.w50b,psr.wsmearb)
+		else:
+		    out_str=out_str+"\t %-.4s \t %-.4s" %(psr.w50b,psr.wsmearb)
+		if snr_beam < 0.1:
+		    snr_beam = 0.0
 		out_str=out_str+" \t %-.6s\t %-.6s\t%-.6s\t%-.6s\t   %-.6s    \t %-.6s    \t" %(snr_exp,snr_catW,snr_smearW,snr_beam,S_offset,dS_offset)
 		summary_file.write(out_str)
 	        if snr_beam > snr_min:				# output to stdout
 		    print "PSR %s detected in beam #%s on MJD %d with S/N of %.3f; expected S/N %.6s" \
 		        %(psr.name, beam_cand.num, mjd, snr_beam, snr_exp)
-		    summary_file.write("Detected in Beam #%6s\n" %beam_cand.num)
+		    summary_file.write("Detected in Beam %6s\n" %beam_cand.num)
 		    num_detect+=1
 		    if psr.name not in name_detect:
 		        name_detect.append(psr.name)
@@ -729,7 +842,7 @@ for i in range(len(psr_tbl[y])):
 		        %(psr.name, beam_cand.num, snr_min, exptd)
 		    if dmsearch and psr.dm != '*' and abs(float(psr.dm)-float(psr.newdm))>10.0:				# If DM searching and there is a non-detection, print difference in DMs to note drastic changes
 		        print "Note: DM changed significantly (difference = %s p/cc)" %(abs(float(psr.dm)-float(psr.newdm)))
-		    summary_file.write("Not Detected in #%6s\n" %beam_cand.num)
+		    summary_file.write("Not Detected in %6s\n" %beam_cand.num)
 	        os.chdir(work_dir)
 
 print ""        
@@ -743,5 +856,8 @@ if yflg:
 print "#####  Summary  #####"
 print "%d pulsars in survey area\nDetected %d pulsars in %d beams\nUnable to find \
 observations on %s for %d beams" \
-    %(len(y),len(name_detect),num_detect,use_comp,num_unobs)
-
+    %(sum(y),len(name_detect),num_detect,use_comp,num_unobs)
+summary_file.write("#@\n")
+summary_file.write("#####  Summary  #####@\n")
+summary_file.write("#@ %d pulsars in survey area\n#@ Detected %d pulsars in %d beams\n#@ Unable to find observations on %s for %d beams" %(sum(y),len(name_detect),num_detect,use_comp,num_unobs))
+summary_file.close()

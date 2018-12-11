@@ -1,0 +1,23 @@
+#@ Using S/N > 6 for detection threshold on zuul
+#@ Using beam #/users/amcewen/GBNCC_work/beams_rfi.txt to search for pulsars from tmp2 
+#@ Only searched for published pulsars
+#@ Flux adjusted for offset from beam center
+#@ Exclamation points next to Wcat and Wsmr indicate cases where W50 is not published, so the average ratio of W50/P0 is used
+#@ S/Ne = expected S/N estimated from published flux values using width calculated from data
+#@ S/Nc = expected S/N calculated using catalog W50
+#@ S/Ns = S/N calulated using Weff (smeared out)
+#@ S/Nm = measured S/N 
+#@ Flux estimated from measured S/N, uncertainty estimated from dependencies
+#@ File generated 2018-10-26 15:59:56 (ET)
+#@  PSRJ  	 RA 	 Dec 	 P0 		 DM 	 Dist  	 MJD     BW	 Spindx  Temp 	Wdat  	Wcat 	Wsmr 	 S/Ne 	 S/Nc 	 S/Ns	S/Nm 	   Flux		 dFlux		Status 
+#@		(deg)	 (deg) 	 (s) 		 (p/cc)	 (deg)	 (day)	(MHz)		 (K) 	(s)    	(s)    	(s)    					   (mJy)	 (mJy)  
+J0613+3731  	 93.30 	 37.52 	 0.619198 	 18.99 	 0.213 	 55682 	 95.8 	 -1.8 	 69.03 	 9.48664 	 0.88 	 3.55 	 51.147	 95.521	47.439	32.361	   1.2873    	 0.3508    	Detected in Beam  29564
+J1842-0359  	 280.6 	 -3.99 	 1.839944 	 195.9 	 0.445 	 58107 	 97.2 	 -1.5 	 486.4 	 95.4555 	 1.95 	 8.06 	 14.111	 33.255	16.098	0.9117	   1.4762    	 0.2145    	Not Detected in  81761
+J1741-0840  	 265.3 	 -8.67 	 2.043082 	 74.9 	 0.299 	 58348 	 98.3 	 -2.5 	 156.9 	 49.9975 	 1.41 	 5.66 	 257.54	 482.88	238.84	32.290	   5.0769    	 0.8053    	Detected in Beam  87204
+J0726-2612  	 111.5 	 -26.2 	 3.442308 	 69.4 	 0.290 	 56771 	 92.3 	 * 	 72.16 	 54.9714 	 0.19 	 0.77 	 36.595	 149.37	74.561	10.981	   0.6334    	 0.1376    	Detected in Beam 109660
+J0343+06    	 55.98 	 6.590 	 1.00764  	 46.3 	 0.266 	 58228 	 97.7 	 * 	 31.73 	 34.3933 	 2.39! 	 9.57! 	 *	 *	*	9.5660	   0.3149    	 0.0908    	Detected in Beam  67154
+#@
+#####  Summary  #####@
+#@ 5 pulsars in survey area
+#@ Detected 4 pulsars in 4 beams
+#@ Unable to find observations on zuul for 0 beams

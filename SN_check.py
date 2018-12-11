@@ -13,9 +13,9 @@ P=50.            #bins
 width_flag=False
 print "Name \t\t beam \t bw \t poln \t sep \t spindx  s350 \t temp \t\t W \t snr_data \t w50b \t snr_catW \t weffb \t snr_smearW "
 out=open('SN_check_output.txt','w')
-out.write("Note: ! indicates lack of catalog value for W50, so 6% of the period is used. Also, *s in the snr_smearW column indicate cases where the width is smeared out beyond the period width.")
-out.write("")
-out.write("Name \t\t beam \t bw \t poln \t sep \t spindx  s350 \t temp \t\t W \t snr_data \t w50b \t snr_catW \t weffb \t snr_smearW ")
+out.write("Note: ! indicates lack of catalog value for W50, so 6% of the period is used. Also, *s in the snr_smearW column indicate cases where the width is smeared out beyond the period width.\n")
+out.write("\n")
+out.write("Name \t\t beam \t bw \t poln \t sep \t spindx  s350 \t temp \t\t W \t snr_data \t w50b \t snr_catW \t weffb \t snr_smearW \n")
 for i in range(len(psr)):
     if i>0 and psr[i]==psr[i-1]:
 	chee=0
@@ -90,7 +90,7 @@ for i in range(len(psr)):
 	snr_smearW=(s350/temp)*pfc*math.sqrt((P-weffb)/weffb)*f
     except:
 	snr_smearW='*'
-    string="%s \t %s \t %.4s \t %s \t %.4s \t %s \t %.7s  %.7s \t %s \t %.7s \t %.4s \t %.7s \t %.4s \t %.7s" %(psr[i],beam[i],bandwidth,poln,sep,spindx,s350,temp,W,snr_data,w50b,snr_catW,weffb,snr_smearW)
+    string="%s \t %s \t %.4s \t %s \t %.4s \t %s \t %.7s  %.7s \t %s \t %.7s \t %.4s \t %.7s \t %.4s \t %.7s \n" %(psr[i],beam[i],bandwidth,poln,sep,spindx,s350,temp,W,snr_data,w50b,snr_catW,weffb,snr_smearW)
     if width_flag:
 	string = string+" !"
     print string

@@ -3,3 +3,395 @@ files that are referenced:
 	-sky temperature file (/users/amcewen/GBNCC_work/skytemp.dat) needs to be updated!
 	-flux file (/users/rspiewak/pulsars/GBNCC_ATNF_fluxes.dat) might need to be updated!
 	-binary pulsar par files (/lustre/cv/projects/GBNCC/amcewen/binary_pars)
+
+
+nosearch detection plot notes
+
+foreach psr ( `cat ~/tmp | awk '{print $1}' | grep -A500 J0653+8051` )
+set beam = `grep $psr ~/tmp | awk '{print $2}'`
+ls amcewen/$psr*temp/*$beam*ps
+gs amcewen/$psr*temp/*$beam*ps
+end
+
+J0014+4746_temp/guppi_55538_GBNCC19802_0113_2bit_0001_PSR_0014+4746.pfd.ps	nuller; rfi cleaning needed
+J0034+69_temp/guppi_55169_GBNCC04709_0176_2bit_0001_36.80ms_Cand.pfd.ps	 	sne>3*snm?
+J0059+50_temp/guppi_55531_GBNCC17752_0089_2bit_0001_996.01ms_Cand.pfd.ps        sne>3*snm?
+J0033+61_temp/guppi_55249_GBNCC09500_0189_2bit_0001_912.00ms_Cand.pfd.ps	nulling or dim
+J0034-0721_temp/guppi_57387_GBNCC85889_0081_2bit_0001_PSR_0034-0721.pfd.ps	possible nuller
+J0040+5716_temp/guppi_55325_GBNCC11940_0205_2bit_0001_PSR_0040+5716.pfd.ps	very narrow pulse
+J0050+03_temp/guppi_58232_GBNCC71173_0128_0001_1366.56ms_Cand.pfd.ps		non-detection (rfi)
+J0053+69_temp/guppi_55169_GBNCC04743_0166_2bit_0001_832.94ms_Cand.pfd.ps	sne>15*snm?
+J0058+6125_temp/guppi_55249_GBNCC09390_0199_2bit_0001_637.00ms_Cand.pfd.ps	nuller
+J0103+54_temp/guppi_55353_GBNCC14647_0106_2bit_0001_354.30ms_Cand.pfd.ps	dim nuller?
+J0112+66_temp/guppi_55188_GBNCC06374_0074_2bit_0001_4301.24ms_Cand.pfd.ps	dim; sne>18*snm?
+J0125+62_temp/guppi_55200_GBNCC08526_0096_2bit_0001_1708.23ms_Cand.pfd.ps	dim/nulling; sne high
+J0134-2937_temp/guppi_56898_GBNCC113517_0055_2bit_0001_PSR_0134-2937.pfd.ps	sne high
+J0136+63_temp/guppi_55197_GBNCC07861_0047_2bit_0001_717.89ms_Cand.pfd.ps	dim; sne high
+J0151-0635_temp/guppi_57387_GBNCC84661_0097_2bit_0001_PSR_0151-0635.pfd.ps	interesting scintillation? sne>>snm
+J0152-1637_temp/guppi_57880_GBNCC97814_0031_2bit_0001_PSR_0152-1637.pfd.ps	sne high
+J0156+3949_temp/guppi_55657_GBNCC27436_0150_2bit_0001_PSR_0156+3949.pfd.ps	dim, needs rfi cleaning; sne high
+J0157+6212_temp/guppi_55200_GBNCC08738_0110_2bit_0001_PSR_0157+6212.pfd.ps	dim/nulling? sne high
+J0212+5222_temp/guppi_55353_GBNCC15681_0216_2bit_0001_PSR_0212+5222.pfd.ps	dim; sne high
+J0215+6218_temp/guppi_55200_GBNCC08772_0118_2bit_0001_PSR_0215+6218.pfd.ps	dim; sne high
+J0218+4232_temp/guppi_55624_GBNCC24509_0038_2bit_0001_PSR_0218+4232.pfd.ps	wide pulse;sne high
+J0242+62_temp/guppi_55197_GBNCC08285_0025_2bit_0001_PSR_0242+62.pfd.ps		need to fit for period; nulling/mode-changing?
+J0244+14_temp/guppi_58254_GBNCC57470_0047_0001_2128.10ms_Cand.pfd.ps		dmsearch and rfi cleaning needed
+J0323+3944_temp/guppi_55654_GBNCC27284_0023_2bit_0001_PSR_0323+3944.pfd.ps	rfi cleaning; sne high
+J0325+67_temp/guppi_55171_GBNCC05625_0083_2bit_0001_PSR_0325+6744.pfd.ps	sne high; nulling?
+J0332+5434_temp/guppi_55348_GBNCC13843_0019_2bit_0001_PSR_0332+5434.pfd.ps	second pulsar?
+J0332+79_temp/guppi_56257_GBNCC01389_0001_0003_2056.21ms_Cand.pfd.ps		non-detection/nuller?
+J0335+4555_temp/guppi_55559_GBNCC21451_0242_2bit_0001_PSR_0335+4555.pfd.ps	needs rfi cleaning; sne high
+J0338+66_temp/guppi_55179_GBNCC06180_0217_2bit_0001_1762.00ms_Cand.pfd.ps	nulling? sne high
+J0341+5711_temp/guppi_55279_GBNCC12191_0092_2bit_0001_1888.00ms_Cand.pfd.ps	nulling? sne~200*snm
+J0343-3000_temp/guppi_56844_GBNCC113899_0116_2bit_0001_PSR_0343-3000.pfd.ps	nulling or dim; sne high
+J0343+5312_temp/guppi_55348_GBNCC15008_0028_2bit_0001_PSR_0343+5312.pfd.ps	second pulsar? nulling?
+J0408+551_temp/guppi_55343_GBNCC13534_0154_2bit_0001_1837.00ms_Cand.pfd.ps	non-detection
+J0410-31_temp/guppi_56902_GBNCC115009_0472_2bit_0001_PSR_0410-31.pfd.ps		nuller, could use rfi cleaning
+J0417+61_temp/guppi_55249_GBNCC09442_0232_2bit_0001_PSR_0417+61.pfd.ps		dim; sne high
+J0419+44_temp/guppi_55561_GBNCC22972_0097_2bit_0001_1241.00ms_Cand.pfd.ps	error with plot
+J0421-0345_temp/guppi_57154_GBNCC81129_0023_2bit_0001_PSR_0421-0345.pfd.ps	rfi cleaning; sne high
+J0426+4933_temp/guppi_55538_GBNCC18126_0005_2bit_0001_PSR_0426+4933.pfd.ps	dim (rfi)
+J0448-2749_temp/guppi_56809_GBNCC111506_0074_2bit_0001_PSR_0448-2749.pfd.ps	nulling? dim
+J0452-1759_temp/guppi_58058_GBNCC99429_0045_2bit_0001_PSR_0452-1759.pfd.ps	interesting jitter? sne high
+J0458-0505_temp/guppi_57379_GBNCC82794_0168_2bit_0001_PSR_0458-0505.pfd.ps	rfi, nulling? dim, very narrow
+J0459-0210_temp/guppi_57662_GBNCC79223_0066_2bit_0001_PSR_0459-0210.pfd.ps	dim, check bandwidth
+J0510+38_temp/guppi_55658_GBNCC28996_0096_2bit_0001_76.56ms_Cand.pfd.ps		dim
+J0519+54_temp/guppi_55343_GBNCC14191_0041_2bit_0001_340.19ms_Cand.pfd.ps	dim; sne high
+J0520-2553_temp/guppi_56776_GBNCC109134_0381_2bit_0001_PSR_0520-2553.pfd.ps	sne high
+J0555+3948_temp/guppi_55650_GBNCC27179_0062_2bit_0001_1146.91ms_Cand.pfd.ps	needs rfi cleaning; nulling or dim
+J0601-0527_temp/guppi_57380_GBNCC83362_0224_2bit_0001_PSR_0601-0527.pfd.ps	high sne
+J0611+04_temp/guppi_58233_GBNCC70154_0148_0001_1674.43ms_Cand.pfd.ps		non-detection; try rfi cleaning
+J0612+3721_temp/guppi_55682_GBNCC29564_0068_2bit_0001_PSR_0612+3721.pfd.ps	high sne
+J0613-0200_temp/guppi_57791_GBNCC78749_0009_2bit_0001_PSR_0613-0200.pfd.ps	dmsearch needed (fixed in search results); high sne
+J0613+3731_temp/guppi_55682_GBNCC29564_0068_2bit_0001_PSR_0613+3731.pfd.ps	rfi cleaning; high sne
+J0614+83_temp/guppi_55148_GBNCC00530_0078_2bit_0001_1039.20ms_Cand.pfd.ps	possibly nulling; high sne
+J0627+0649_temp/guppi_58202_GBNCC66761_0026_0001_PSR_0627+0649.pfd.ps		high sne
+J0627+0706_temp/guppi_58202_GBNCC66761_0026_0001_PSR_0627+0706.pfd.ps		interpulse or wrong frequency?
+J0630-0046_temp/guppi_57540_GBNCC76953_0076_2bit_0001_PSR_0630-0046.pfd.ps	rfi; dim; high sne
+J0630-2834_temp/guppi_56777_GBNCC112375_0332_2bit_0001_PSR_0630-2834.pfd.ps	interesting profile; high sne
+J0636+5129_temp/guppi_55442_GBNCC16534_0138_2bit_0001_PSR_0636+5129.pfd.ps	high sne
+J0645+80_temp/guppi_55146_GBNCC01119_0017_2bit_0001_657.87ms_Cand.pfd.ps	high sne
+J0652-0142_temp/guppi_57763_GBNCC78207_0130_2bit_0001_PSR_0652-0142.pfd.ps	rfi cleaning; high sne
+J0653+8051_temp/guppi_55146_GBNCC00975_0014_2bit_0001_PSR_0653+8051.pfd.ps	high sne
+J0656-2228_temp/guppi_56655_GBNCC105123_0008_2bit_0001_PSR_0656-2228.pfd.ps	nulling; high sne
+J0719-2545_temp/guppi_56771_GBNCC109194_0028_2bit_0001_PSR_0719-2545.pfd.ps	scattering tail; high sne
+J0721-2038_temp/guppi_58107_GBNCC102662_0033_2bit_0001_PSR_0721-2038.pfd.ps	dim; high sne
+J0725-1635_temp/guppi_57854_GBNCC97727_0115_2bit_0001_PSR_0725-1635.pfd.ps	dim; high sne
+J0726-2612_temp/guppi_56771_GBNCC109660_0029_2bit_0001_PSR_0726-2612.pfd.ps	dim/nulling? rfi cleaning might help; high sne
+J0729-1448_temp/guppi_57854_GBNCC95376_0119_2bit_0001_PSR_0729-1448.pfd.ps	dmsearch needed (fixed in search pipeline); high sne
+J0737-2202_temp/guppi_56663_GBNCC104437_0050_2bit_0001_PSR_0737-2202.pfd.ps	high sne
+J0737-3039A_temp/guppi_56902_GBNCC114773_0576_2bit_0001_PSR_0737-3039A.pfd.ps	interpulse or wrong frequency?
+J0737+69_temp/guppi_55173_GBNCC04936_0167_2bit_0001_6824.24ms_Cand.pfd.ps	rfi; nulling or saturation?
+J0740+6620_temp/guppi_55189_GBNCC06389_0063_2bit_0001_PSR_0740+6620.pfd.ps	dm searching helps (fixed in search pipeline)
+J0742-2822_temp/guppi_56778_GBNCC112278_0351_2bit_0001_PSR_0742-2822.pfd.ps	high sne
+J0746+66_temp/guppi_55189_GBNCC06245_0066_2bit_0001_407.67ms_Cand.pfd.ps	nulling? dim; high sne
+J0750+57_temp/guppi_55290_GBNCC12256_0018_2bit_0001_1174.88ms_Cand.pfd.ps	interesting profile; dim; high sne
+J0754+3231_temp/guppi_56278_GBNCC34991_0098_2bit_0001_PSR_0754+3231.pfd.ps	nulling; high sne
+J0758-1528_temp/guppi_57150_GBNCC96342_0115_2bit_0001_PSR_0758-1528.pfd.ps	high sne
+J0812-3905_temp/guppi_56973_GBNCC123957_0092_2bit_0001_PSR_0812-3905.pfd.ps	dim, wide pulse; high sne
+J0814+7429_temp/guppi_55171_GBNCC02797_0112_2bit_0001_PSR_0814+7429.pfd.ps	high sne
+J0818-3232_temp/guppi_56813_GBNCC116671_0006_2bit_0001_PSR_0818-3232.pfd.ps	giant pulse? rfi cleaning might help; high sne
+J0820-1350_temp/guppi_57096_GBNCC94025_0213_2bit_0001_PSR_0820-1350.pfd.ps	high sne
+J0820-3826_temp/guppi_56971_GBNCC123292_0122_2bit_0001_PSR_0820-3826.pfd.ps	high sne
+J0820-3921_temp/guppi_56973_GBNCC124279_0097_2bit_0001_PSR_0820-3921.pfd.ps	nulling?
+J0823+0159_temp/guppi_57688_GBNCC73353_0020_2bit_0001_PSR_0823+0159.pfd.ps	high sne
+J0826+2637_temp/guppi_56529_GBNCC41968_0093_2bit_0001_PSR_0826+2637.pfd.ps	high sne
+J0828-3417_temp/guppi_56902_GBNCC119200_0590_2bit_0001_PSR_0828-3417.pfd.ps	interesting pulse profile, mode-changing/nulling/drifting?
+J0837+0610_temp/guppi_58079_GBNCC67753_0009_2bit_0001_PSR_0837+0610.pfd.ps	high sne
+J0838-2621_temp/guppi_56747_GBNCC109563_0038_2bit_0001_PSR_0838-2621.pfd.ps	high sne
+J0843+0719_temp/guppi_58001_GBNCC66855_0098_2bit_0001_PSR_0843+0719.pfd.ps	rfi; non-detection
+J0846-3533_temp/guppi_56936_GBNCC120221_0095_2bit_0001_1116.10ms_Cand.pfd.ps	high sne
+J0908-1739_temp/guppi_57148_GBNCC99206_0068_2bit_0001_PSR_0908-1739.pfd.ps	high sne
+J0912-3851_temp/guppi_56972_GBNCC123915_0018_2bit_0001_PSR_0912-3851.pfd.ps	dim/nulling?; high sne
+J0921+6254_temp/guppi_55202_GBNCC08389_0063_2bit_0001_PSR_0921+6254.pfd.ps	high sne
+J0928+30_temp/guppi_56053_GBNCC37368_0015_2bit_0001_2091.90ms_Cand.pfd.ps	non-detection; rfi cleaning might help
+J0932-3217_temp/guppi_56785_GBNCC116807_0113_2bit_0001_PSR_0932-3217.pfd.ps	high sne
+J0943+41_temp/guppi_55635_GBNCC25990_0194_2bit_0001_2229.49ms_Cand.pfd.ps	needs rfi cleaning; nulling? high sne
+J0944-1354_temp/guppi_57095_GBNCC93873_0267_2bit_0001_PSR_0944-1354.pfd.ps	high sne
+J0952-3839_temp/guppi_56973_GBNCC123606_0128_2bit_0001_PSR_0952-3839.pfd.ps	nulling? needs dmsearch (fixed); high sne
+J0957-06_temp/guppi_57213_GBNCC84469_0049_2bit_0001_1723.70ms_Cand.pfd.ps	non-detection, rfi
+J1012+5307_temp/guppi_55351_GBNCC15400_0060_2bit_0001_PSR_1012+5307.pfd.ps	wrong period, corrected plot in ~/temp
+J1034-3224_temp/guppi_56785_GBNCC116765_0136_2bit_0001_PSR_1034-3224.pfd.ps	interesting profile; nulling or giant pulse?
+J1041-1942_temp/guppi_56998_GBNCC101727_0033_2bit_0001_PSR_1041-1942.pfd.ps	high sne
+J1047-3032_temp/guppi_56777_GBNCC114736_0040_2bit_0001_PSR_1047-3032.pfd.ps	high sne
+J1101+65_temp/guppi_55227_GBNCC07051_0105_2bit_0001_3631.32ms_Cand.pfd.ps	nulling, dim, and narrow; high sne
+J1110+58_temp/guppi_55285_GBNCC10944_0142_2bit_0001_793.35ms_Cand.pfd.ps	dim; high sne
+J1115+5030_temp/guppi_55367_GBNCC17188_0101_2bit_0001_PSR_1115+5030.pfd.ps	nulling? high sne
+J1122+78_temp/guppi_55168_GBNCC01540_0062_2bit_0001_PSR_1124+78.pfd.ps		high sne
+J1124-3653_temp/guppi_56907_GBNCC120349_0042_2bit_0001_2.41ms_Cand.pfd.ps	non-detection
+J1141-3107_temp/guppi_56780_GBNCC115592_0074_2bit_0001_PSR_1141-3107.pfd.ps	high sne
+J1141-3322_temp/guppi_56844_GBNCC117799_0320_2bit_0001_PSR_1141-3322.pfd.ps	high sne
+J1226-3223_temp/guppi_56899_GBNCC116359_0104_2bit_0001_PSR_1226-3223.pfd.ps	non-detection, rfi cleaning would help
+J1239+2453_temp/guppi_56458_GBNCC43486_0111_2bit_0001_PSR_1239+2453.pfd.ps	high sne
+J1242+39_temp/guppi_55692_GBNCC27982_0102_2bit_0001_1310.00ms_Cand.pfd.ps	non-detection
+J1257-1027_temp/guppi_57062_GBNCC89655_0092_2bit_0001_PSR_1257-1027.pfd.ps	high sne
+J1320-3512_temp/guppi_56962_GBNCC119799_0143_2bit_0001_PSR_1320-3512.pfd.ps	dim; high sne
+J1320+67_temp/guppi_55200_GBNCC05781_0335_2bit_0001_1028.62ms_Cand.pfd.ps	dim or nulling? high sne
+J1321+8323_temp/guppi_55166_GBNCC00524_0026_2bit_0001_PSR_1321+8323.pfd.ps	high sne
+J1332-3032_temp/guppi_56845_GBNCC114576_0365_2bit_0001_PSR_1332-3032.pfd.ps	nulling, interpulse; high sne
+J1335-3642_temp/guppi_56972_GBNCC121574_0081_2bit_0001_399.19ms_Cand.pfd.ps	needs dmsearch (fixed); high sne
+J1418-3921_temp/guppi_57063_GBNCC124315_0111_2bit_0001_PSR_1418-3921.pfd.ps	high sne
+J1434+7257_temp/guppi_55196_GBNCC03333_0014_2bit_0001_PSR_1434+7257.pfd.ps	dim; high sne
+J1439+76_temp/guppi_55196_GBNCC01969_0020_2bit_0001_947.90ms_Cand.pfd.ps	nulling/dim
+J1501-0046_temp/guppi_57509_GBNCC77261_0016_2bit_0001_PSR_1501-0046.pfd.ps	nulling?
+J1509+5531_temp/guppi_55349_GBNCC13271_0006_2bit_0001_PSR_1509+5531.pfd.ps	high sne
+J1518+0204C_temp/guppi_57690_GBNCC73491_0184_2bit_0001_PSR_1518+0204C.pfd.ps	non-detection?
+J1528-3146_temp/guppi_56936_GBNCC116000_0218_2bit_0001_PSR_1528-3146.pfd.ps	dim, subpulse in different frequency range?; high sne
+J1532+2745_temp/guppi_56457_GBNCC40831_0096_2bit_0001_PSR_1532+2745.pfd.ps	high sne
+J1536-3602_temp/guppi_57095_GBNCC120880_0430_2bit_0001_PSR_1536-3602.pfd.ps	dmsearch helps (fixed); nulling
+J1543-0620_temp/guppi_58082_GBNCC84560_0117_2bit_0001_PSR_1543-0620.pfd.ps	high sne
+J1600-3053_temp/guppi_56933_GBNCC114992_0061_2bit_0001_PSR_1600-3053.pfd.ps	non-detection? p0 search might help?
+J1603-2531_temp/guppi_56755_GBNCC109070_0163_2bit_0001_PSR_1603-2531.pfd.ps	dim; high sne
+J1603-2712_temp/guppi_56779_GBNCC110667_0035_2bit_0001_PSR_1603-2712.pfd.ps	nulling?
+J1614-3937_temp/guppi_58175_GBNCC124519_0043_0001_PSR_1614-3937.pfd.ps		dmsearch needed (fixed); high sne
+J1622-3751_temp/guppi_57152_GBNCC122634_0009_2bit_0001_PSR_1622-3751.pfd.ps	rfi cleaning needed, chans 2250:3250; high sne
+J1623-0908_temp/guppi_58257_GBNCC87822_0014_0001_PSR_1623-0908.pfd.ps		high sne
+J1623-2631_temp/guppi_56776_GBNCC109714_0015_2bit_0001_PSR_1623-2631.pfd.ps	scattering/dmsearch? high sne
+J1627+86_temp/guppi_55149_GBNCC00110_0024_2bit_0001_395.79ms_Cand.pfd.ps	dim; high sne
+J1629+43_temp/guppi_55553_GBNCC23222_0212_2bit_0001_181.17ms_Cand.pfd.ps	interpulse? high sne
+J1638-3815_temp/guppi_57155_GBNCC123045_0089_2bit_0001_PSR_1638-3815.pfd.ps	dim, rfi; high sne
+J1645-0317_temp/guppi_58054_GBNCC80337_0042_2bit_0001_PSR_1645-0317.pfd.ps	high sne
+J1646-2142_temp/guppi_56588_GBNCC103826_0121_2bit_0001_PSR_1646-2142.pfd.ps	non-detection
+J1648-3256_temp/guppi_56989_GBNCC117589_0075_2bit_0001_PSR_1648-3256.pfd.ps	high sne
+J1649+2533_temp/guppi_56480_GBNCC43174_0197_2bit_0001_PSR_1649+2533.pfd.ps	nulling, dmsearch needed (fixed); high sne
+J1649+80_temp/guppi_55166_GBNCC00987_0170_2bit_0001_PSR_1649+80.pfd.ps		dim; high sne
+J1652-2404_temp/guppi_56754_GBNCC107109_0063_2bit_0001_PSR_1652-2404.pfd.ps	nulling?
+J1654-2713_temp/guppi_56783_GBNCC110680_0015_2bit_0001_PSR_1654-2713.pfd.ps	dim; high sne
+J1700-3312_temp/guppi_56989_GBNCC117534_0087_2bit_0001_PSR_1700-3312.pfd.ps	nulling? high sne
+J1700-3611_temp/guppi_57129_GBNCC120728_0196_2bit_0001_PSR_1700-3611.pfd.ps	nulling or bright pulses? high sne
+J1703-38_temp/guppi_57155_GBNCC123168_0112_2bit_0001_6443.00ms_Cand.pfd.ps	rfi, interpulse? 
+J1705-3423_temp/guppi_57123_GBNCC118987_0086_2bit_0001_PSR_1705-3423.pfd.ps	scattering tail; high sne
+J1708-3426_temp/guppi_57127_GBNCC118843_0202_2bit_0001_PSR_1708-3426.pfd.ps	scattering tail; high sne
+J1710-2616_temp/guppi_56776_GBNCC109494_0027_2bit_0001_PSR_1710-2616.pfd.ps	interpulse? nulling? high sne
+J1710+49_temp/guppi_55416_GBNCC18355_0007_2bit_0001_PSR_1710+4923.pfd.ps	dim; high sne
+J1713-3844_temp/guppi_57213_GBNCC123490_0007_2bit_0001_PSR_1713-3844.pfd.ps	rfi? DM curve flat
+J1727-2739_temp/guppi_56783_GBNCC110892_0039_2bit_0001_PSR_1727-2739.pfd.ps	dim, nulling? sne high
+J1728-0007_temp/guppi_57506_GBNCC76080_0033_2bit_0001_PSR_1728-0007.pfd.ps	high sne
+J1729-2117_temp/guppi_56588_GBNCC103750_0140_2bit_0001_PSR_1729-2117.pfd.ps	dim; high sne
+J1730-2304_temp/guppi_56750_GBNCC105957_0205_2bit_0001_8.12ms_Cand.pfd.ps	dm search helps (fixed); high sne
+J1733-2228_temp/guppi_56750_GBNCC105203_0204_2bit_0001_PSR_1733-2228.pfd.ps	nulling/scintillations/mode-changing?
+J1734-0212_temp/guppi_57542_GBNCC78753_0126_2bit_0001_PSR_1734-0212.pfd.ps	scintillation? high sne
+J1735-0724_temp/guppi_58255_GBNCC85518_0070_0001_PSR_1735-0724.pfd.ps		nulling/scintillation?
+J1736-2457_temp/guppi_56755_GBNCC108020_0229_2bit_0001_PSR_1736-2457.pfd.ps	dim/nulling? high sne
+J1741-2733_temp/guppi_56783_GBNCC111070_0052_2bit_0001_PSR_1741-2733.pfd.ps	high sne
+J1741-3927_temp/guppi_57538_GBNCC124600_0216_2bit_0001_PSR_1741-3927.pfd.ps	scattering; high sne
+J1743-0339_temp/guppi_58054_GBNCC80439_0077_2bit_0001_PSR_1743-0339.pfd.ps	nulling?
+J1743-3150_temp/guppi_56933_GBNCC115861_0109_2bit_0001_PSR_1743-3150.pfd.ps	scattering? very dim
+J1744-2335_temp/guppi_56746_GBNCC106135_0125_2bit_0001_PSR_1744-2335.pfd.ps	high sne
+J1745-3040_temp/guppi_56930_GBNCC115107_0006_2bit_0001_PSR_1745-3040.pfd.ps	nulling
+J1746+2245_temp/guppi_56481_GBNCC46470_0102_2bit_0001_PSR_1746+2245.pfd.ps	very few pulses; nulling?
+J1748-2446L_temp/guppi_56755_GBNCC107965_0223_2bit_0001_PSR_1748-2446L.pfd.ps	non-detection
+J1750-3503_temp/guppi_57151_GBNCC119754_0022_2bit_0001_PSR_1750-3503.pfd.ps	dim, wide pulse; high sne
+J1752+2359_temp/guppi_56480_GBNCC44729_0230_2bit_0001_PSR_1752+2359.pfd.ps	nulling; high sne
+J1753-38_temp/guppi_57384_GBNCC123558_0156_2bit_0001_666.80ms_Cand.pfd.ps	nulling?
+J1754-3443_temp/guppi_57151_GBNCC119000_0025_2bit_0001_PSR_1754-3443.pfd.ps	scattering tail, dim, wide pulse
+J1758+3030_temp/guppi_56178_GBNCC37443_0102_2bit_0001_PSR_1758+3030.pfd.ps	nulling?
+J1759-2922_temp/guppi_56902_GBNCC113078_0192_2bit_0001_PSR_1759-2922.pfd.ps	high sne
+J1759-3107_temp/guppi_56932_GBNCC115285_0050_2bit_0001_PSR_1759-3107.pfd.ps	nulling? high sne
+J1800+50_temp/guppi_55384_GBNCC17381_0077_2bit_0001_PSR_1800+5034.pfd.ps	high sne
+J1801-0357_temp/guppi_58087_GBNCC81460_0033_0001_PSR_1801-0357.pfd.ps		rfi, nulling?; high sne
+J1802+0128_temp/guppi_57854_GBNCC74318_0039_2bit_0001_PSR_1802+0128.pfd.ps	rfi cleaning needed; non-detection?
+J1803-3329_temp/guppi_57121_GBNCC118102_0074_2bit_0001_PSR_1803-3329.pfd.ps	non-detection?
+J1804-2717_temp/guppi_56783_GBNCC110960_0069_2bit_0001_PSR_1804-2717.pfd.ps	interesting profile; incorrect period? high sne
+J1807-2715_temp/guppi_56782_GBNCC110583_0004_2bit_0001_PSR_1807-2715.pfd.ps	high sne
+J1808-0813_temp/guppi_58258_GBNCC86717_0043_0001_PSR_1808-0813.pfd.ps		nulling, rfi; high sne
+J1809-0119_temp/guppi_57511_GBNCC77601_0139_2bit_0001_PSR_1809-0119.pfd.ps	very dim
+J1809-3547_temp/guppi_57151_GBNCC120165_0032_2bit_0001_PSR_1809-3547.pfd.ps	interesting wide pulse, dim; high sne
+J1811-2439_temp/guppi_56773_GBNCC107478_0203_2bit_0001_PSR_1811-2439.pfd.ps	dm search helps (fixed)
+J1815+55_temp/guppi_55346_GBNCC13378_0099_2bit_0001_PSR_1815+5546.pfd.ps	dim; high sne
+J1816-0755_temp/guppi_58258_GBNCC86429_0044_0001_PSR_1816-0755.pfd.ps		dm search helps (fixed)
+J1816+4510_temp/guppi_55526_GBNCC22350_0002_2bit_0001_PSR_1816+4510.pfd.ps	interpulse, maybe fit for p0; sne high
+J1817-3618_temp/guppi_57152_GBNCC120864_0071_2bit_0001_PSR_1817-3618.pfd.ps	nulling; high sne
+J1817-3837_temp/guppi_57383_GBNCC123448_0003_2bit_0001_PSR_1817-3837.pfd.ps	high sne
+J1820-0509_temp/guppi_58233_GBNCC83091_0017_0001_PSR_1820-0509.pfd.ps		nulling, dmsearch needed (fixed)
+J1821+41_temp/guppi_55689_GBNCC25400_0098_2bit_0001_PSR_1821+4147.pfd.ps	rfi cleaning; nulling? high sne
+J1823-0154_temp/guppi_57535_GBNCC78156_0045_2bit_0001_PSR_1823-0154.pfd.ps	high sne
+J1823-3106_temp/guppi_56931_GBNCC115175_0038_2bit_0001_PSR_1823-3106.pfd.ps	high sne
+J1824-0127_temp/guppi_57535_GBNCC77779_0037_2bit_0001_PSR_1824-0127.pfd.ps	rfi, dm search (fixed)
+J1825+0004_temp/guppi_57506_GBNCC76182_0062_2bit_0001_PSR_1825+0004.pfd.ps	rfi
+J1832-0827_temp/guppi_58258_GBNCC86840_0061_0001_647.29ms_Cand.pfd.ps		rfi, non-detection
+J1833-0209_temp/guppi_57542_GBNCC79088_0153_2bit_0001_PSR_1833-0209.pfd.ps	non-detection
+J1833-0338_temp/guppi_57999_GBNCC81062_0147_2bit_0001_PSR_1833-0338.pfd.ps	scattering
+J1834-0010_temp/guppi_57506_GBNCC76504_0064_2bit_0001_PSR_1834-0010.pfd.ps 	possible rfi	
+J1834-0426_temp/guppi_58055_GBNCC81672_0123_2bit_0001_PSR_1834-0426.pfd.ps	interesting pulse profile
+J1837-0045_temp/guppi_57506_GBNCC76737_0065_2bit_0001_PSR_1837-0045.pfd.ps	rfi, high sne
+J1840+5640_temp/guppi_55330_GBNCC12514_0042_2bit_0001_PSR_1840+5640.pfd.ps	nuller
+J1842+0257_temp/guppi_57666_GBNCC72035_0014_2bit_0001_PSR_1842+0257.pfd.ps	rfi, nuller
+J1843-0000_temp/guppi_57506_GBNCC76216_0066_2bit_0001_PSR_1843-0000.pfd.ps	rfi, possible scattering; high sne
+J1844+00_temp/guppi_57877_GBNCC75229_0061_2bit_0001_460.50ms_Cand.pfd.ps	rfi, scattering? high sne
+J2325-0530_temp/guppi_57380_GBNCC83258_0046_2bit_0001_PSR_2325-0530.pfd.png	nulling
+J0201+7005_temp/guppi_55163_GBNCC04557_0107_2bit_0001_PSR_0201+7005.pfd.png	very dim
+J2243+69_temp/guppi_55164_GBNCC04738_0080_2bit_0001_855.40ms_Cand.pfd.png	sne high
+J2242+6950_temp/guppi_55164_GBNCC04738_0080_2bit_0001_PSR_2242+6950.pfd.png	sne high
+J0108+6905_temp/guppi_55169_GBNCC04921_0157_2bit_0001_PSR_0108+6905.pfd.png	interesting profile, nulling/mode-changing/drifting?
+J1859+76_temp/guppi_55177_GBNCC01979_0015_2bit_0001_PSR_1859+7654.pfd.png	nulling? high sne
+J2113+67_temp/guppi_55179_GBNCC06021_0160_2bit_0001_552.17ms_Cand.pfd.png	nulling?
+J1939+66_temp/guppi_55179_GBNCC06461_0047_2bit_0001_PSR_1939+66.pfd.png		high sne
+J0358+66_temp/guppi_55180_GBNCC06447_0233_2bit_0001_PSR_0358+6627.pfd.png	nulling?
+J0102+6537_temp/guppi_55188_GBNCC06662_0077_2bit_0001_PSR_0102+6537.pfd.png	interesting profile, nulling/mode-changing?
+J2225+6535_temp/guppi_55196_GBNCC06911_0014_2bit_0001_PSR_2225+6535.pfd.png	interesting profile, time-dependent intensity?
+J2137+64_temp/guppi_55196_GBNCC07508_0051_2bit_0001_PSR_2137+6428.pfd.png	nulling? high sne
+J2352+65_temp/guppi_55197_GBNCC06992_0128_2bit_0001_1164.00ms_Cand.pfd.png	dim/nulling? high sne
+J2319+6411_temp/guppi_55198_GBNCC07767_0113_2bit_0001_PSR_2319+6411.pfd.png	scattering tail, high dm
+J2325+6316_temp/guppi_55198_GBNCC08233_0077_2bit_0001_PSR_2325+6316.pfd.png	nulling/mode-changing
+J2229+6205_temp/guppi_55199_GBNCC08741_0018_2bit_0001_PSR_2229+6205.pfd.png	nulling/mode-changing/interesting profile
+J2337+6151_temp/guppi_55199_GBNCC08788_0050_2bit_0001_PSR_2337+6151.pfd.png	nulling; high sne
+J2354+6155_temp/guppi_55199_GBNCC08966_0056_2bit_0001_PSR_2354+6155.pfd.png	nulling; high sne
+J1929+62_temp/guppi_55200_GBNCC08723_0087_2bit_0001_1456.00ms_Cand.pfd.png	high sne
+J1647+66_temp/guppi_55202_GBNCC06532_0194_2bit_0001_PSR_1647+6608.pfd.png	nulling? interesting profile
+J2149+6329_temp/guppi_55229_GBNCC08063_0057_2bit_0001_PSR_2149+6329.pfd.png	interesting profile/jitter; dmsearch helps (fixed)
+J2326+6113_temp/guppi_55235_GBNCC09453_0019_2bit_0001_PSR_2326+6113.pfd.png	nulling/bright pulses
+J0406+6138_temp/guppi_55237_GBNCC09120_0177_2bit_0001_594.58ms_Cand.pfd.png	scintillation?
+J0243+6027_temp/guppi_55250_GBNCC09882_0230_2bit_0001_1473.00ms_Cand.pfd.png	nulling/bright pulses
+J0141+6009_temp/guppi_55250_GBNCC09924_0015_2bit_0001_PSR_0141+6009.pfd.png	nulling
+J2321+6024_temp/guppi_55250_GBNCC09974_0051_2bit_0001_2256.49ms_Cand.pfd.png    nulling
+J2238+6021_temp/guppi_55250_GBNCC10050_0059_2bit_0001_3070.00ms_Cand.pfd.png    nulling?
+J2046+5708_temp/guppi_55325_GBNCC12053_0069_2bit_0001_PSR_2046+5708.pfd.png	scintillation; high sne
+J0139+5621_temp/guppi_55325_GBNCC12652_0234_2bit_0001_PSR_0139+5621.pfd.png	dim/nulling?
+J2222+5602_temp/guppi_55325_GBNCC12833_0134_2bit_0001_1336.00ms_Cand.pfd.png	dim/nulling; high sne
+J2308+5547_temp/guppi_55328_GBNCC12990_0150_2bit_0001_PSR_2308+5547.pfd.png	interesting profile/mode-changing?
+J1922+58_temp/guppi_55330_GBNCC11218_0016_2bit_0001_PSR_1922+58.pfd.png		high sne
+J0454+5543_temp/guppi_55343_GBNCC13081_0033_2bit_0001_PSR_0454+5543.pfd.png	interesting profile/jitter/scattering
+J0358+5413_temp/guppi_55343_GBNCC14199_0160_2bit_0001_PSR_0358+5413.pfd.png	nulling/scintillation?
+J2208+5500_temp/guppi_55348_GBNCC13875_0071_2bit_0001_PSR_2208+5500.pfd.png	nulling/bright pulses; dmsearch will help (fixed)
+J2030+55_temp/guppi_55362_GBNCC13849_0120_2bit_0001_579.00ms_Cand.pfd.png	nuller?
+J2038+5319_temp/guppi_55362_GBNCC14925_0111_2bit_0001_PSR_2038+5319.pfd.png	high sne
+J2150+5247_temp/guppi_55362_GBNCC15438_0059_2bit_0001_PSR_2150+5247.pfd.png	high sne
+J1935+52_temp/guppi_55363_GBNCC15954_0134_2bit_0001_568.39ms_Cand.pfd.png	nuller? high sne
+J2022+5154_temp/guppi_55383_GBNCC16344_0014_2bit_0001_PSR_2022+5154.pfd.png	nuller/bright pulses?
+J0055+5117_temp/guppi_55405_GBNCC16532_0023_2bit_0001_PSR_0055+5117.pfd.png	nulling/mode-changing
+J1955+5059_temp/guppi_55420_GBNCC16975_0046_2bit_0001_PSR_1955+5059.pfd.png	nulling?
+J2023+5037_temp/guppi_55440_GBNCC17331_0052_2bit_0001_PSR_2023+5037.pfd.png	interpulse
+J2047+5029_temp/guppi_55441_GBNCC17454_0029_2bit_0001_PSR_2047+5029.pfd.png	non-detection
+J0357+5236_temp/guppi_55504_GBNCC15563_0074_2bit_0001_PSR_0357+5236.pfd.png	scattering tail
+J2044+4614_temp/guppi_55508_GBNCC21169_0328_2bit_0001_PSR_2044+4614.pfd.png	scattering tail, high dm
+J2027+4557_temp/guppi_55508_GBNCC21368_0316_2bit_0001_PSR_2027+4557.pfd.png	interesting profile/scattering
+J0056+4756_temp/guppi_55538_GBNCC19493_0096_2bit_0001_PSR_0056+4756.pfd.png	nulling?
+J0502+4654_temp/guppi_55552_GBNCC20545_0170_2bit_0001_PSR_0502+4654.pfd.png	rfi cleaning needed
+J2305+4707_temp/guppi_55557_GBNCC20365_0095_2bit_0001_PSR_2305+4707.pfd.png	rfi cleaning needed
+J2113+4644_temp/guppi_55557_GBNCC20538_0206_2bit_0001_PSR_2113+4644.pfd.png	interesting profile/nulling; sne high
+J2313+4253_temp/guppi_55625_GBNCC24402_0093_2bit_0001_PSR_2313+4253.pfd.png	high sne
+J2108+4441_temp/guppi_55626_GBNCC22279_0052_2bit_0001_PSR_2108+4441.pfd.png	interesting profile, scintillation
+J1954+43_temp/guppi_55633_GBNCC23363_0110_2bit_0001_PSR_1954+4357.pfd.png	nulling/mode-changing?
+J1941+43_temp/guppi_55633_GBNCC23795_0012_2bit_0001_PSR_1941+4320.pfd.png	high sne
+J2001+42_temp/guppi_55633_GBNCC24439_0118_2bit_0001_PSR_2001+4258.pfd.png	high sne
+J2207+40_temp/guppi_55657_GBNCC26185_0045_2bit_0001_636.99ms_Cand.pfd.png	rfi cleaning; high sne
+J0610+37_temp/guppi_55682_GBNCC29564_0068_2bit_0001_443.86ms_Cand.pfd.png	rfi cleaning
+J0610+37_temp/guppi_55682_GBNCC29564_0068_2bit_0001_PSR_0612+3721.pfd.png	rfi cleaning
+J0417+35_temp/guppi_55683_GBNCC31334_0045_2bit_0001_654.40ms_Cand.pfd.png	rfi cleaning
+J2002+4050_temp/guppi_55691_GBNCC26269_0088_2bit_0001_PSR_2002+4050.pfd.png	high sne; scattering tail
+J1907+4002_temp/guppi_55846_GBNCC27154_0082_2bit_0001_PSR_1907+4002.pfd.png	mode-changing/nulling?
+J2157+4017_temp/guppi_55847_GBNCC26850_0055_2bit_0001_PSR_2157+4017.pfd.png	mode-changing/nulling/jitter?
+J2111+40_temp/guppi_55848_GBNCC26693_0136_2bit_0001_4061.00ms_Cand.pfd.png	non-detection; rfi cleaning may help
+J2013+3845_temp/guppi_55852_GBNCC28565_0093_2bit_0001_PSR_2013+3845.pfd.png	nulling? scattering, high dm
+J2102+38_temp/guppi_55982_GBNCC29565_0033_2bit_0001_1190.00ms_Cand.pfd.png	nulling?
+J1913+3732_temp/guppi_56017_GBNCC29827_0017_2bit_0001_PSR_1913+3732.pfd.png	dmsearch helps (fixed)
+J2037+3621_temp/guppi_56025_GBNCC31039_0020_2bit_0001_PSR_2037+3621.pfd.png	nulling? rfi cleaning?
+J2055+3630_temp/guppi_56025_GBNCC31073_0024_2bit_0001_PSR_2055+3630.pfd.png	scattering tail
+J0048+3412_temp/guppi_56025_GBNCC33544_0129_2bit_0001_PSR_0048+3412.pfd.png	rfi cleaning, nulling?
+J1948+3540_temp/guppi_56044_GBNCC31636_0011_2bit_0001_PSR_1948+3540.pfd.png	scattering tail
+J1721+35_temp/guppi_56072_GBNCC31830_0230_2bit_0001_821.90ms_Cand.pfd.png	needs rfi cleaning
+J1952+3252_temp/guppi_56073_GBNCC34686_0062_2bit_0001_PSR_1952+3252.pfd.png	dmsearch will help (fixed)
+J2002+3217_temp/guppi_56073_GBNCC35385_0071_2bit_0001_PSR_2002+3217.pfd.png	nulling/bright pulses? rfi cleaning
+J2004+3137_temp/guppi_56075_GBNCC36228_0257_2bit_0001_PSR_2004+3137.pfd.png	high sne; some rfi cleaning
+J2305+3100_temp/guppi_56080_GBNCC36856_0117_2bit_0001_PSR_2305+3100.pfd.png	high sne; rfi cleaning
+J0146+31_temp/guppi_56081_GBNCC36840_0175_2bit_0001_938.10ms_Cand.pfd.png	needs rfi cleaning
+J2227+30_temp/guppi_56081_GBNCC37398_0067_2bit_0001_842.41ms_Cand.pfd.png	dm impressively wrong, fixed in dmsearch; high sne
+J1937+2950_temp/guppi_56082_GBNCC38079_0029_2bit_0001_PSR_1937+2950.pfd.png	nulling?
+J1900+30_temp/guppi_56085_GBNCC37024_0095_2bit_0001_602.23ms_Cand.pfd.png	nulling?
+J2214+3000_temp/guppi_56086_GBNCC38207_0080_2bit_0001_PSR_2214+3000.pfd.png	dim; sne high
+J1954+2923_temp/guppi_56086_GBNCC38490_0012_2bit_0001_PSR_1954+2923.pfd.png	nulling?
+J2222+2923_temp/guppi_56086_GBNCC38529_0086_2bit_0001_PSR_2222+2923.pfd.png	nulling?
+J2212+2933_temp/guppi_56086_GBNCC38584_0078_2bit_0001_PSR_2212+2933.pfd.png	interesting profile; sne high
+J2022+2854_temp/guppi_56089_GBNCC39223_0131_2bit_0001_PSR_2022+2854.pfd.png	mode-changing?
+J2036+2835_temp/guppi_56089_GBNCC39401_0136_2bit_0001_PSR_2036+2835.pfd.png	dmsearch helps (fixed), nulling
+J1955+2908_temp/guppi_56107_GBNCC39100_0228_2bit_0001_PSR_1955+2908.pfd.png	high sne
+J1957+2831_temp/guppi_56107_GBNCC39710_0231_2bit_0001_PSR_1957+2831.pfd.png	high sne
+J2105+28_temp/guppi_56156_GBNCC39757_0009_2bit_0001_405.74ms_Cand.pfd.png	dim; high sne
+J2155+2813_temp/guppi_56156_GBNCC39770_0047_2bit_0001_PSR_2155+2813.pfd.png	high sne
+J2113+2754_temp/guppi_56156_GBNCC40456_0015_2bit_0001_PSR_2113+2754.pfd.png	nulling? high sne
+J2229+2643_temp/guppi_56159_GBNCC41579_0120_2bit_0001_PSR_2229+2643.pfd.png	high sne
+J2156+2618_temp/guppi_56177_GBNCC42354_0031_2bit_0001_PSR_2156+2618.pfd.png	high sne
+J1937+2544_temp/guppi_56180_GBNCC43247_0041_2bit_0001_PSR_1937+2544.pfd.png	mode-changing? interesting
+J2015+2524_temp/guppi_56180_GBNCC43315_0052_2bit_0001_PSR_2015+2524.pfd.png	nulling?
+J1941+2525_temp/guppi_56180_GBNCC43480_0042_2bit_0001_PSR_1941+2525.pfd.png	very dim; high sne
+J2008+2513_temp/guppi_56224_GBNCC43836_0050_2bit_0001_PSR_2008+2513.pfd.png	nulling? high sne
+J1849+2423_temp/guppi_56276_GBNCC44454_0012_2bit_0001_PSR_1849+2423.pfd.png	dim; high sne
+J1927+2234_temp/guppi_56296_GBNCC46496_0198_2bit_0001_PSR_1927+2234.pfd.png	nulling? dmsearch helps (fixed); high sne
+J1946+2244_temp/guppi_56296_GBNCC46530_0201_2bit_0001_PSR_1946+2244.pfd.png	nulling? high sne
+J1903+2225_temp/guppi_56457_GBNCC47216_0205_2bit_0001_PSR_1903+2225.pfd.png	dim; high sne
+J1652+2651_temp/guppi_56459_GBNCC41810_0291_2bit_0001_PSR_1652+2651.pfd.png	mode-changing?
+J1912+2104_temp/guppi_56460_GBNCC48525_0177_2bit_0001_PSR_1912+2104.pfd.png	mode-changing? high sne
+J1939+2134_temp/guppi_56460_GBNCC48648_0188_2bit_0001_1.56ms_Cand.pfd.png	dmsearch helps ; high sne
+J2111+2106_temp/guppi_56477_GBNCC48585_0043_2bit_0001_PSR_2111+2106.pfd.png	nulling
+J1959+2048_temp/guppi_56477_GBNCC48915_0014_2bit_0001_PSR_1959+2048.pfd.png	non-detection/rfi? high sne
+J1932+2020_temp/guppi_56477_GBNCC49546_0002_2bit_0001_PSR_1932+2020.pfd.png	scattering tail
+J0540+3207_temp/guppi_56478_GBNCC35740_0124_2bit_0001_PSR_0540+3207.pfd.png	nulling/giant pulses? 
+J2234+2114_temp/guppi_56480_GBNCC48433_0341_2bit_0001_PSR_2234+2114.pfd.png	nulling
+J2016+1948_temp/guppi_56480_GBNCC49703_0302_2bit_0001_PSR_2016+1948.pfd.png	dmsearch needed (fixed)
+J2037+1942_temp/guppi_56480_GBNCC49970_0296_2bit_0001_PSR_2037+1942.pfd.png	nulling
+J1012-2337_temp/guppi_56666_GBNCC106539_0352_2bit_0001_PSR_1012-2337.pfd.png	nulling?
+J0733-2345_temp/guppi_56722_GBNCC106788_0113_2bit_0001_PSR_0733-2345.pfd.png	rfi cleaning might help
+J1822-2256_temp/guppi_56750_GBNCC105826_0219_2bit_0001_PSR_1822-2256.pfd.png	nulling/scintillating/mode-changing? rfi cleaning might help
+J1641-2347_temp/guppi_56752_GBNCC106554_0165_2bit_0001_PSR_1641-2347.pfd.png	drifitng subpulses?
+J1940-2403_temp/guppi_56752_GBNCC106949_0216_2bit_0001_1855.28ms_Cand.pfd.png	nulling? rfi cleaning might help
+J1941-2602_temp/guppi_56777_GBNCC109156_0029_2bit_0001_PSR_1941-2602.pfd.png	high sne
+J1900-2600_temp/guppi_56777_GBNCC109465_0016_2bit_0001_PSR_1900-2600.pfd.png	interesting profile
+J1816-2650_temp/guppi_56782_GBNCC110295_0009_2bit_0001_PSR_1816-2650.pfd.png	interesting profile
+J1712-2715_temp/guppi_56783_GBNCC110714_0029_2bit_0001_PSR_1712-2715.pfd.png	scattering tail?
+J2154-28_temp/guppi_56838_GBNCC111978_0036_2bit_0001_1343.35ms_Cand.pfd.png	rfi removal needed
+J1801-2920_temp/guppi_56903_GBNCC113311_0019_2bit_0001_PSR_1801-2920.pfd.png	drifting subpulses?
+J1655-3048_temp/guppi_56932_GBNCC115094_0022_2bit_0001_PSR_1655-3048.pfd.png	interesting profile, drifting subpulses?
+J1722-3207_temp/guppi_56958_GBNCC116204_0056_2bit_0001_477.16ms_Cand.pfd.png	scattering tail
+J1703-3241_temp/guppi_56962_GBNCC116780_0240_2bit_0001_PSR_1703-3241.pfd.png	fit for p0
+J1455-3330_temp/guppi_56962_GBNCC117995_0175_2bit_0001_PSR_1455-3330.pfd.png	subpulse in different frequency range?
+J0804-3647_temp/guppi_56969_GBNCC121284_0038_2bit_0001_PSR_0804-3647.pfd.png	dmsearch will help (fixed)
+J0729-1836_temp/guppi_56993_GBNCC100167_0049_2bit_0001_PSR_0729-1836.pfd.png	interesting profile/subpulses?
+J2108-3429_temp/guppi_57015_GBNCC119196_0065_2bit_0001_PSR_2108-3429.pfd.png	nulling? high sne
+J2144-3933_temp/guppi_57152_GBNCC124199_0171_2bit_0001_PSR_2144-3933.pfd.png	nulling, very narrow; sne high
+J0624-0424_temp/guppi_57154_GBNCC81655_0075_2bit_0001_PSR_0624-0424.pfd.png	interesting profile, mode-changing?
+J1932-3655_temp/guppi_57155_GBNCC121987_0197_2bit_0001_PSR_1932-3655.pfd.png	nulling? needs rfi cleaning; sne high
+J2038-3816_temp/guppi_57170_GBNCC123021_0100_2bit_0001_PSR_2038-3816.pfd.png	nulling?
+J1024-0719_temp/guppi_57379_GBNCC85202_0046_2bit_0001_5.16ms_Cand.pfd.png	dmsearch needed 
+J2346-0609_temp/guppi_57384_GBNCC84135_0153_2bit_0001_PSR_2346-0609.pfd.png	interesting pulse profile, nulling; high sne
+J2145-0750_temp/guppi_57445_GBNCC86426_0042_2bit_0001_PSR_2145-0750.pfd.png	interesting profile, all subpulses identical
+J1849-0317_temp/guppi_57452_GBNCC80486_0006_2bit_0001_PSR_1849-0317.pfd.png	dmsearch needed (fixed), interpulse?
+J2046-0421_temp/guppi_57452_GBNCC81910_0058_2bit_0001_PSR_2046-0421.pfd.png	rfi; sne high
+J2005-0020_temp/guppi_57507_GBNCC76441_0180_2bit_0001_PSR_2005-0020.pfd.png	rfi cleaning, high sne
+J1945-0040_temp/guppi_57507_GBNCC76784_0173_2bit_0001_PSR_1945-0040.pfd.png	nulling? interesting profile
+J1851-0053_temp/guppi_57510_GBNCC76915_0012_2bit_0001_PSR_1851-0053.pfd.png	nulling?
+J2248-0101_temp/guppi_57510_GBNCC77035_0110_2bit_0001_PSR_2248-0101.pfd.png	high sne
+J1848-0123_temp/guppi_57511_GBNCC77669_0154_2bit_0001_PSR_1848-0123.pfd.png	scattering tail; sne high
+J1720-0212_temp/guppi_57655_GBNCC79185_0112_2bit_0001_PSR_1720-0212.pfd.png	interesting profile; mode-changing?
+J1735-0243_temp/guppi_57656_GBNCC79363_0122_2bit_0001_PSR_1735-0243.pfd.png	nulling? rfi cleaning needed
+J2051-0827_temp/guppi_57656_GBNCC87544_0155_2bit_0001_PSR_2051-0827.pfd.png	high sne
+J1914+0219_temp/guppi_57666_GBNCC72624_0026_2bit_0001_PSR_1914+0219.pfd.png	dmsearch will help (fixed); high sne
+J1915+0227_temp/guppi_57666_GBNCC72624_0026_2bit_0001_PSR_1915+0227.pfd.png	dmsearch will help (fixed); high sne
+J1812+0226_temp/guppi_57692_GBNCC72666_0031_2bit_0001_PSR_1812+0226.pfd.png	rfi cleaning needed
+J2139+00_temp/guppi_57696_GBNCC75014_0121_2bit_0001_312.47ms_Cand.pfd.png	dmsearch needed
+J2033+0042_temp/guppi_57753_GBNCC74590_0009_2bit_0001_PSR_2033+0042.pfd.png	nulling, rfi cleaning needed
+J1941+0121_temp/guppi_57755_GBNCC74344_0007_2bit_0001_PSR_1941+0121.pfd.png	dmsearch needed (fixed)
+J1856+0113_temp/guppi_57818_GBNCC74187_0020_2bit_0001_PSR_1856+0113.pfd.png	dim; sne high
+J1911+00_temp/guppi_57877_GBNCC74975_0074_2bit_0001_6940.00ms_Cand.pfd.png	rfi
+J1859+00_temp/guppi_57877_GBNCC75030_0062_2bit_0001_559.63ms_Cand.pfd.png	dmsearch would help ; high sne
+J1919+0021_temp/guppi_57877_GBNCC75674_0082_2bit_0001_PSR_1919+0021.pfd.png	look at single pulse
+J1904+0004_temp/guppi_57877_GBNCC75873_0064_2bit_0001_PSR_1904+0004.pfd.png	sne high
+J2006-0807_temp/guppi_57877_GBNCC86777_0104_2bit_0001_PSR_2006-0807.pfd.png	interesting profile, nulling
+J1850+0026_temp/guppi_57992_GBNCC75318_0086_2bit_0001_PSR_1850+0026.pfd.png	dim; high sne
+J1847-0402_temp/guppi_58055_GBNCC81240_0114_2bit_0001_PSR_1847-0402.pfd.png	scattering tail
+J1849-0614_temp/guppi_58087_GBNCC84057_0054_0001_PSR_1849-0614.pfd.png		nulling? rfi
+J2330-2005_temp/guppi_58106_GBNCC102045_0015_2bit_0001_PSR_2330-2005.pfd.png	nulling? sne high
+J2048-1616_temp/guppi_58118_GBNCC97037_0044_2bit_0001_PSR_2048-1616.pfd.png	interesting profile; nulling?
+J1918-0642_temp/guppi_58174_GBNCC84790_0008_0001_PSR_1918-0642.pfd.png		dmsearch helps; high sne
+J1852-0635_temp/guppi_58204_GBNCC84290_0012_0001_PSR_1852-0635.pfd.png		rfi
+J1849-0636_temp/guppi_58204_GBNCC85044_0008_0001_PSR_1849-0636.pfd.png		nulling; rfi cleaning needed
+J1903-0632_temp/guppi_58204_GBNCC85222_0036_0001_PSR_1903-0632.pfd.png		scattering?
+J1903-0848_temp/guppi_58227_GBNCC87806_0070_0001_PSR_1903-0848.pfd.png		needs rfi cleaning
+J0051+0423_temp/guppi_58229_GBNCC70186_0023_0001_PSR_0051+0423.pfd.png		interesting profile
+J2033-1938_temp/guppi_58232_GBNCC101650_0038_0001_PSR_2033-1938.pfd.png		interesting profile
+J0348+0432_temp/guppi_58233_GBNCC69594_0053_0001_PSR_0348+0432.pfd.png		non-detection?
+J0533+0402_temp/guppi_58251_GBNCC71073_0111_0001_PSR_0533+0402.pfd.png		nulling
+J1725-0732_temp/guppi_58255_GBNCC85806_0060_0001_PSR_1725-0732.pfd.png		dm search needed
+J1918-1052_temp/guppi_58255_GBNCC90191_0134_0001_PSR_1918-1052.pfd.png		rfi cleaning needed
+J1915-11_temp/guppi_58255_GBNCC90945_0126_0001_2177.00ms_Cand.pfd.png		rfi cleaning needed
+
