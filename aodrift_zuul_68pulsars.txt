@@ -1,1 +1,0 @@
-amcewen/aodrift_data/aodrift_zuul_68pulsars.txt

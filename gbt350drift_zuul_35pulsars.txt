@@ -1,1 +1,0 @@
-amcewen/gbt350drift_data/gbt350drift_zuul_35pulsars.txt

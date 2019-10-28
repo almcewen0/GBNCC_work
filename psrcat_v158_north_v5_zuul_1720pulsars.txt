@@ -1,1 +1,0 @@
-/lustre/cv/projects/GBNCC/amcewen/psrcat_v158_north_v5_zuul_1720pulsars.txt
