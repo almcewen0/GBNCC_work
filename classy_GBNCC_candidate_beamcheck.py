@@ -39,7 +39,7 @@
 import numpy as np
 import sys, os
 from glob import glob
-import subprocess as sproc
+from subprocess import call,Popen,PIPE
 from time import strftime
 import argparse as ap
 from astropy.coordinates import SkyCoord,Latitude,Longitude 
@@ -143,7 +143,7 @@ class Pulsar:
 		self.specflgs=''
 		if name in specflgpsrs:
 		    flg=''
-		    for f in sproc.Popen("grep %s /users/amcewen/special_flags.txt" %name,shell=True,stdout=sproc.PIPE).communicate()[0].split()[1:]:
+		    for f in Popen("grep %s /users/amcewen/special_flags.txt" %name,shell=True,stdout=PIPE).communicate()[0].split()[1:]:
 			flg=flg+' '+f
 		    self.specflgs=flg
 		if len(cat_dat[cat_dat['name']==name]) != 0:
@@ -430,7 +430,7 @@ for i in range(len(psr_tbl[y])):
 	else: 
 	    psr.beams.append(Beam(pointings[p_coord.separation(SkyCoord(pointings['RAdeg'],pointings['Decdeg']))==p_coord.separation(SkyCoord(pointings['RAdeg'],pointings['Decdeg'])).min()][0][0]))
     elif os.path.isfile(beam_psr):
-	psr.beams.append(Beam('GBNCC'+sproc.Popen("grep %s %s | awk '{print $2}'" %(psr.name,beam_psr),shell=True,stdout=sproc.PIPE).communicate()[0].split('\n')[0]))
+	psr.beams.append(Beam('GBNCC'+Popen("grep %s %s | awk '{print $2}'" %(psr.name,beam_psr),shell=True,stdout=PIPE).communicate()[0].split('\n')[0]))
     elif int(beam_psr) not in beam_rejects:
 	beam_psr='GBNCC'+beam_psr
 	psr.beams.append(Beam(beam_psr))
@@ -471,41 +471,47 @@ for i in range(len(psr_tbl[y])):
 	print "Skipping new pulsar: "+psr.name
 	continue
     elif rewrite:
-	sproc.call("rm -r %s%s_temp" %(work_dir,psr.name),shell=True)
-	sproc.call("rm %sdetection_plots/*" %work_dir,shell=True)
+	call("rm -r %s%s_temp" %(work_dir,psr.name),shell=True)
+	call("rm %sdetection_plots/*" %work_dir,shell=True)
 	os.mkdir("%s%s_temp" %(work_dir,psr.name))
     os.chdir("%s_temp/" %psr.name)
     if not os.path.isfile('%s_short.par' %psr.name) and not psr.par == '':      # Linking .par file to directory
-	sproc.call('cp -sf %s .' %psr.par,shell=True)
+	call('cp -sf %s .' %psr.par,shell=True)
     for beam_cand in psr.beams:
 	if os.getcwd().split('/')[-1] != "%s_temp" %psr.name:
 	    os.chdir(work_dir+"%s_temp/" %psr.name)
 	beam_cand.ang_off(psr.ra,psr.dec)              # Calculate the angular offset between pulsar and beam and store this value in the beam metadata
 	if len(glob('*%s*fits' %beam_cand.name))==0:
 	    if not nonew:
-	        fits_list=glob('%s2*/gu*G????%s_*fits' %(data_dir,beam_cand.num))  # Search for GBNCC .fits files
-	        if len(fits_list)==1:
-	            sproc.call("ln -sf %s ." %fits_list[0],shell=True)
-		    beam_cand.add_fits(fits_list[0].split('/')[-1])       
-	        elif len(fits_list)>1:
-		    print "Multiple files for pointing #%s" %beam_cand.num
-		    for i in fits_list:
-	                sproc.call("ln -sf %s ." %i,shell=True)
-		        beam_cand.add_fits(i.split('/')[-1])
-                else:
-                    print "Cannot find beam #%s on %s for PSR %s" %(beam_cand.num, use_comp, psr.name)
+		fitsfound=False
+		dirs=[data_dir,'/lustre/lard/projects/GBNCC/']
+		j=0
+		for fits_list in [glob('%s2*/gu*G????%s_*fits' %(dirs[0],beam_cand.num)),glob('%s2*/gu*G????%s_*fits' %(dirs[1],beam_cand.num))]:
+	        #fits_list=glob('%s2*/gu*G????%s_*fits' %(data_dir,beam_cand.num))  # Search for GBNCC .fits files 
+	            if len(fits_list)==1:
+	                call("ln -sf %s ." %fits_list[0],shell=True)
+		        beam_cand.add_fits(fits_list[0].split('/')[-1])
+			fitsfound=True       
+	            elif len(fits_list)>1:
+		        print "Multiple files for pointing #%s" %beam_cand.num
+		        for i in fits_list:
+	                    call("ln -sf %s ." %i,shell=True)
+		            beam_cand.add_fits(i.split('/')[-1])
+			fitsfound=True
+                    else:
+			fitsdir=''
+                        print "Cannot find beam #%s in %s for PSR %s" %(beam_cand.num, dirs[j], psr.name)
+		    j+=1
+		if not fitsfound:
 		    if dmsearch:
-                        summary_file.write("%-12s\t %-5.5s \t %-5.5s \t %-8.8s \t %-.5s \t * \t\t %-.5s \t * \t *  \t %-.4s \t %-.5s \t * \t\t * \t \
-%-.3s \t %-.3s \t * \t * \t  * \t   * \t\t *  \t\tBeam %6s Not Found\n" \
+                    	summary_file.write("%-12s\t %-5.5s \t %-5.5s \t %-8.8s \t %-.5s \t * \t\t %-.5s \t * \t *  \t %-.4s \t %-.5s \t * \t\t * \%-.3s \t %-.3s \t * \t * \t  * \t   * \t\t *  \t\tBeam %6s Not Found\n" \
                         %(psr.name,psr.ra,psr.dec,psr.p0,psr.dm,beam_cand.off,psr.spindx,psr.temp,psr.w50,psr.wsmear,beam_cand.num))
 		    else:
-		        summary_file.write("%-12s\t %-5.5s \t %-5.5s \t %-8.8s \t %-.5s \t %-.5s \t * \t * \t %-.4s \t %-.5s \t * \t\t * \t \
-%-.3s \t %-.3s \t * \t * \t  * \t   * \t\t *  \t\tBeam %6s Not Found\n" \
+		        summary_file.write("%-12s\t %-5.5s \t %-5.5s \t %-8.8s \t %-.5s \t %-.5s \t * \t * \t %-.4s \t %-.5s \t * \t\t * \%-.3s \t %-.3s \t * \t * \t  * \t   * \t\t *  \t\tBeam %6s Not Found\n" \
                         %(psr.name,psr.ra,psr.dec,psr.p0,psr.dm,beam_cand.off,psr.spindx,psr.temp,psr.w50,psr.wsmear,beam_cand.num))
                     num_unobs += 1
                     os.chdir(work_dir)
                     continue
-
 	    else:
 		print "Cannot find beam #%s on %s for PSR %s" %(beam_cand.num, use_comp, psr.name)
 		if dmsearch:
@@ -536,43 +542,63 @@ for i in range(len(psr_tbl[y])):
 	        rfi_opt = " -zapchan 2470:3270"
 	    else:
 	        rfi_opt = " "
-	    if len(glob('*%s*%s*rfifind.mask' %(mjd,beam_cand.num)))==0 \
-	        or len(glob('*%s*%s*rfifind.stats' %(mjd,beam_cand.num)))==0:               # If current directory doesn't have mask/stats files, check mask repository
-	        if len(glob(data_dir+'amcewen/mask_files/*%s*%s*rfifind.mask' %(mjd,beam_cand.num)))==0 \
-		    or len(glob(data_dir+'amcewen/mask_files/*%s*%s*rfifind.stats' %(mjd,beam_cand.num)))==0:      # If they aren't found there, try to get them from Scott's archives
-		    mask_dir=glob(data_dir+'20*/*%s*GBNCC%s*' %(mjd,beam_cand.num))[0].split('/')[5] 
-		    if len(glob(data_dir+mask_dir+'/*rfi*tar*'))>0:
-			print "untarring mask file"
-			os.chdir(data_dir+'amcewen/mask_files/')
-			for tar_file in glob(data_dir+mask_dir+'/*rfi*tar*'):
-			    if len(glob('*%s*%s*rfifind.mask' %(mjd,beam_cand.num)))==0:
-				sproc.call('tar -xf '+tar_file+' \*GBNCC\*d.mask', shell=True)
-			    if len(glob('*%s*%s*rfifind.stats' %(mjd,beam_cand.num)))==0:
-				sproc.call('tar -xf '+tar_file+' \*GBNCC\*d.stats', shell=True)
-			sproc.call('ln -sf *%s*GBNCC%s*rfifind.mask %s*%s*/' %(mjd,beam_cand.num,work_dir,psr.name),shell=True)
-			sproc.call('ln -sf *%s*GBNCC%s*rfifind.stats %s*%s*/' %(mjd,beam_cand.num,work_dir,psr.name),shell=True)
-			os.chdir(work_dir+'%s_temp' %psr.name)
-		    else:											# If there is no appropriate archive, run rfifind
-			print "Running rfifind for %s beam candidate %s..." %(psr.name,beam_cand.num)
-			rfi_out = open('rfifind_%s_%s_output.txt' %(mjd,beam_cand.num),'w')
-			rfi_out.write("nice rfifind %s%s%s -o %s_%s_%s %s"
-			    %(rfi_std,raw_opt,rfi_opt,psr.name,mjd,beam_cand.num,fits))
-			p = sproc.Popen("nice rfifind %s%s%s -o %s_%s_%s %s"
-			    %(rfi_std,raw_opt,rfi_opt,psr.name,mjd,beam_cand.num,fits),
-		            stdout=rfi_out, shell=True)
-			p.wait()
-			rfi_out.flush()
-			rfi_out.close()
-			del p
-			sproc.call("mv *%s*%s_*d.mask %samcewen/mask_files" %(mjd,beam_cand.num,data_dir),shell=True)
-                        sproc.call("mv *%s*%s_*d.stats %samcewen/mask_files" %(mjd,beam_cand.num,data_dir),shell=True)
-		    sproc.call('ln -sf %samcewen/mask_files/*%s*%s_*d.mask .' %(data_dir,mjd,beam_cand.num), shell=True)        # Move mask/stas files to the mask repository and link to them
-		    sproc.call('ln -sf %samcewen/mask_files/*%s*%s_*d.stats .' %(data_dir,mjd,beam_cand.num), shell=True) 
-	        else:													# Take mask/stats files from mask repository
-		    mask_dir=glob(data_dir+'amcewen/mask_files/*%s*%s_*rfifind.mask' %(mjd,beam_cand.num))[0]
-		    stats_dir=glob(data_dir+'amcewen/mask_files/*%s*%s_*rfifind.stats' %(mjd,beam_cand.num))[0]
-		    sproc.call('cp -fs %s .' %mask_dir,shell=True)
-		    sproc.call('cp -fs %s .' %stats_dir,shell=True)
+	    while len(glob('%s%s_temp/*%s*%s*rfifind.mask' %(work_dir,psr.name,mjd,beam_cand.num)))==0 \
+	        or len(glob('%s%s_temp/*%s*%s*rfifind.stats' %(work_dir,psr.name,mjd,beam_cand.num)))==0:               # If current directory doesn't have mask/stats files, check mask repository
+	        if len(glob(data_dir+'amcewen/mask_files/*/*%s*%s*rfifind.mask' %(mjd,beam_cand.num)))!=0 \
+		    and len(glob(data_dir+'amcewen/mask_files/*/*%s*%s*rfifind.stats' %(mjd,beam_cand.num)))!=0:
+		    mask_dir=glob(data_dir+'amcewen/mask_files/*/*%s*%s_*rfifind.mask' %(mjd,beam_cand.num))[0]
+		    stats_dir=glob(data_dir+'amcewen/mask_files/*/*%s*%s_*rfifind.stats' %(mjd,beam_cand.num))[0]
+		    call('ln -sf %s .' %mask_dir,shell=True)
+		    call('ln -sf %s .' %stats_dir,shell=True)
+		if len(glob('%s%s_temp/*%s*%s*rfifind.mask' %(work_dir,psr.name,mjd,beam_cand.num)))!=0:
+		    break
+		lowlim=int(np.floor(float(beam_cand.num)/5000)*5000)
+		highlim=int(np.ceil(float(beam_cand.num)/5000)*5000)
+		msk_tar=glob(data_dir+'amcewen/mask_files/GBNCC_%s-%s*tar.gz' %(lowlim,highlim))[0]		    # Next, check my archives
+		os.chdir(data_dir+'amcewen/mask_files/')
+		print "attempting to untar %s mask/stats files from tarball in %samcewen/mask_files/" %(beam_cand.name,data_dir)
+		try:
+		    call('tar -xvf %s \*GBNCC%s_\*' %(msk_tar,beam_cand.num),shell=True)
+		except:
+		    print "failed to untar mask file"
+		if len(glob(data_dir+'amcewen/mask_files/*/*%s*%s_*.mask' %(mjd,beam_cand.num)))>0 and len(glob(data_dir+'amcewen/mask_files/*/*%s*%s_*.stats' %(mjd,beam_cand.num)))>0:
+		    call('ln -sf %samcewen/mask_files/*/*%s*%s_*.mask %s%s_temp/' %(data_dir,mjd,beam_cand.num,work_dir,psr.name),shell=True)
+		    call('ln -sf %samcewen/mask_files/*/*%s*%s_*.stats %s%s_temp/' %(data_dir,mjd,beam_cand.num,work_dir,psr.name),shell=True)
+		if len(glob('%s%s_temp/*%s*%s*rfifind.mask' %(work_dir,psr.name,mjd,beam_cand.num)))!=0:
+		    break
+		try:
+		    mask_dir=glob(data_dir+'20*/*%s*GBNCC%s*' %(mjd,beam_cand.num))[0].split('/')[5]        # If they aren't found there, try to get them from Scott's archives   
+		except:
+		    mask_dir=glob('/lustre/lard/projects/GBNCC/20*/*%s*GBNCC%s*' %(mjd,beam_cand.num))[0].split('/')[5]
+		if len(glob(data_dir+mask_dir+'/*rfi*tar*'))>0:
+		    print "untarring mask file"
+		    os.chdir(data_dir+'amcewen/mask_files/')
+		    for tar_file in glob(data_dir+mask_dir+'/*rfi*tar*'):
+			if len(glob('*%s*%s*rfifind.mask' %(mjd,beam_cand.num)))==0 or len(glob('*%s*%s*rfifind.mask' %(mjd,beam_cand.num)))==0:
+			    call('tar -xf %s \*GBNCC%s_\*find.*' %(tar_file,beam_cand.num), shell=True)
+			    call('ln -sf *%s*GBNCC%s*rfifind.mask %s*%s*/' %(mjd,beam_cand.num,work_dir,psr.name),shell=True)
+			    call('ln -sf *%s*GBNCC%s*rfifind.stats %s*%s*/' %(mjd,beam_cand.num,work_dir,psr.name),shell=True)
+		os.chdir('%s%s_temp/' %(work_dir,psr.name))
+		print "Running rfifind for %s beam candidate %s..." %(psr.name,beam_cand.num)
+		rfi_out = open('rfifind_%s_%s_output.txt' %(mjd,beam_cand.num),'w')
+		rfi_out.write("nice rfifind %s%s%s -o %s_%s_%s %s"
+			%(rfi_std,raw_opt,rfi_opt,psr.name,mjd,beam_cand.num,fits))
+		p = Popen("nice rfifind %s%s%s -o %s_%s_%s %s"
+			%(rfi_std,raw_opt,rfi_opt,psr.name,mjd,beam_cand.num,fits),
+		        stdout=rfi_out, shell=True)
+		p.wait()
+		rfi_out.flush()
+		rfi_out.close()
+		del p
+		if not os.path.isdir('%samcewen/mask_files/GBNCC_%s-%s_mask' %(data_dir,lowlim,highlim)):
+		    call('mkdir %samcewen/mask_files/GBNCC_%s-%s_mask' %(data_dir,lowlim,highlim),shell=True)
+		call("mv *%s*%s_*d.mask %samcewen/mask_files/GBNCC_%s-%s_mask" %(mjd,beam_cand.num,data_dir,lowlim,highlim),shell=True)
+                call("mv *%s*%s_*d.stats %samcewen/mask_files/GBNCC_%s-%s_mask" %(mjd,beam_cand.num,data_dir,lowlim,highlim),shell=True)
+		call("mv *%s*%s_*rfifind.* %samcewen/mask_files/not_mask_stats"  %(mjd,beam_cand.num,data_dir),shell=True)
+		call('ln -sf %samcewen/mask_files/*/*%s*%s_*d.mask .' %(data_dir,mjd,beam_cand.num), shell=True)        # Move mask/stats files to the mask repository and link to them
+		call('ln -sf %samcewen/mask_files/*/*%s*%s_*d.stats .' %(data_dir,mjd,beam_cand.num), shell=True) 
+
+	    os.chdir(work_dir+'%s_temp' %psr.name)
 	    beam_cand.add_mask(glob('*%s*%s*rfifind.mask' %(mjd,beam_cand.num))[0])
 	    if len(beam_cand.fits) == len(beam_cand.maskfrac) and beam_cand.maskfrac[-1] != '':                 # Calculate mask fraction (if it isn't already reported in Will's file)
 	        bandwidth=100.*(1-beam_cand.maskfrac[-1])
@@ -599,7 +625,7 @@ for i in range(len(psr_tbl[y])):
 	    prep_str = " -n %d -nsub %d -npart %d -fine%s -mask %s -noxwin %s" \
 	        %(nbinx, nsub, nintx, raw_opt, beam_cand.mask[-1], fits)
 	    if str(igchn)!="None":
-		chans=sproc.Popen("grep %s %s | awk '{print $2}'" %(psr.name,igchn),shell=True,stdout=sproc.PIPE).communicate()[0].split('\n')[0]
+		chans=Popen("grep %s %s | awk '{print $2}'" %(psr.name,igchn),shell=True,stdout=PIPE).communicate()[0].split('\n')[0]
 		if len(chans)!=0:
 		    prep_str="-ignorechan " +chans+prep_str
 	    if nbinx != 200:
@@ -609,15 +635,15 @@ for i in range(len(psr_tbl[y])):
 	    if len(prof_cand) == 0 and psr.par != '':			# Begin prepfolding, first with a par file (if available), then with command line parameters
 	        print "Attempting to fold %s with par file..." %psr.name
 	        if len(glob("prepfold_%s_%s_output.txt"%(mjd,beam_cand.num))) > 0:
-		    sproc.call("rm prepfold_%s_%s_output.txt"%(mjd,beam_cand.num), shell=True)
+		    call("rm prepfold_%s_%s_output.txt"%(mjd,beam_cand.num), shell=True)
 	        fold_out = open('prepfold_%s_%s_output.txt' %(mjd,beam_cand.num),'w')
-		if sproc.Popen(["grep PB %s" %psr.par],stdout=sproc.PIPE,shell=True).communicate()[0]=='':
+		if Popen(["grep PB %s" %psr.par],stdout=PIPE,shell=True).communicate()[0]=='':
 	            fold_out.write("prepfold -par %s -nopdsearch %s %s"%(psr.par,flag_search,prep_str))
-	            p = sproc.Popen("prepfold -par %s -nopdsearch %s %s"%(psr.par,flag_search,prep_str), 
+	            p = Popen("prepfold -par %s -nopdsearch %s %s"%(psr.par,flag_search,prep_str), 
 		        shell=True, stdout=fold_out)
 		else:
 		    fold_out.write("prepfold -par %s %s %s"%(psr.par,flag_search,prep_str))
-		    p = sproc.Popen("prepfold -par %s %s %s"%(psr.par,flag_search,prep_str),
+		    p = Popen("prepfold -par %s %s %s"%(psr.par,flag_search,prep_str),
 			shell=True, stdout=fold_out)
 	        p.wait()
 	        fold_out.flush()
@@ -627,7 +653,7 @@ for i in range(len(psr_tbl[y])):
 	    if len(prof_cand) == 0:
 	        print "Attempting to fold %s with simple parameters..." %psr.name
 	        if os.path.isfile("prepfold_%s_%s_output.txt" %(mjd,beam_cand.num)):
-		    sproc.call("rm prepfold_%s_%s_output.txt" %(mjd,beam_cand.num), shell=True)
+		    call("rm prepfold_%s_%s_output.txt" %(mjd,beam_cand.num), shell=True)
 	        fold_out = open('prepfold_%s_%s_output.txt' %(mjd,beam_cand.num),'w')
 	        prepfold_parameters="prepfold -p %.11f -pd 0.0 -nopdsearch" %psr.p0
 		if dmsearch:
@@ -639,7 +665,7 @@ for i in range(len(psr_tbl[y])):
 		prepfold_parameters = prepfold_parameters + psr.specflgs
 	        fold_out.write(prepfold_parameters+" %s %s" 
 		    %(flag_search, prep_str))
-	        p = sproc.Popen(prepfold_parameters+" %s %s" 
+	        p = Popen(prepfold_parameters+" %s %s" 
 		    %(flag_search, prep_str), 
 		    shell=True,stdout=fold_out)
 	        p.wait()
@@ -651,15 +677,15 @@ for i in range(len(psr_tbl[y])):
 	        print "Not fully processed, skipping..."
 	    else:
 	        if dmsearch:                                    # Record the new DM if searching
-		    psr.newdm=sproc.Popen(["grep 'Best DM' prepfold_%s_%s_output.txt | awk '{print $6}'" %(mjd,beam_cand.num)],stdout=sproc.PIPE,shell=True).communicate()[0][0:-1]
+		    psr.newdm=Popen(["grep 'Best DM' prepfold_%s_%s_output.txt | awk '{print $6}'" %(mjd,beam_cand.num)],stdout=PIPE,shell=True).communicate()[0][0:-1]
 		    newdmerr=(psr.p0/nbinx)*(.35**3/100.)*(1/8.298e-6)			    # Calculate error on DM using bin resolution
 	        # Deal with multiple bestprof files
 	        best_prof_list = np.array(glob('gu*%s*%s*prof' %(mjd,beam_cand.num)))       # Finding the best_prof to use for calculation of flux and S/N
 	        if len(best_prof_list) == 1:
 		    prof_file = best_prof_list[0]
 	        elif len(best_prof_list) > 1:
-		    chisq = np.array([float(sproc.Popen(["grep 'Reduced' %s | \
-		        awk '{print $5}'" %prof_file], stdout=sproc.PIPE, shell=True).communicate()[0])
+		    chisq = np.array([float(Popen(["grep 'Reduced' %s | \
+		        awk '{print $5}'" %prof_file], stdout=PIPE, shell=True).communicate()[0])
 		        for prof_file in best_prof_list])
 		    prof_file = best_prof_list[chisq == chisq.max()][0]
 	        elif len(best_prof_list) == 0:
@@ -728,10 +754,10 @@ for i in range(len(psr_tbl[y])):
 		#plt.show()
 	        sig = val[lim].std()
 	        if len(beam_cand.fits) != len(beam_cand.maskfrac):					# if Will hasn't reported a mask fraction, calculate it using prepfold output
-		    frac_num = float(sproc.Popen(["grep points prepfold_%s_%s_output.txt | awk -F'= ' '{print $2}'| head -2 | tail -1" \
-		        %(mjd,beam_cand.num)],stdout=sproc.PIPE,shell=True).communicate()[0][0:-1])
-		    frac_denom =  float(sproc.Popen(["grep points prepfold_%s_%s_output.txt | awk -F'= ' '{print $2}'| head -1" \
-		        %(mjd,beam_cand.num)],stdout=sproc.PIPE,shell=True).communicate()[0][0:-1])
+		    frac_num = float(Popen(["grep points prepfold_%s_%s_output.txt | awk -F'= ' '{print $2}'| head -2 | tail -1" \
+		        %(mjd,beam_cand.num)],stdout=PIPE,shell=True).communicate()[0][0:-1])
+		    frac_denom =  float(Popen(["grep points prepfold_%s_%s_output.txt | awk -F'= ' '{print $2}'| head -1" \
+		        %(mjd,beam_cand.num)],stdout=PIPE,shell=True).communicate()[0][0:-1])
 		    beam_cand.maskfrac.append(float(1-frac_num/frac_denom))
 		    bandwidth=100.*(1-beam_cand.maskfrac[-1])
 		poln=2
@@ -754,7 +780,7 @@ for i in range(len(psr_tbl[y])):
 		        snr_smearW = 'W>P'
 	        else: 
 		    snr_smearW = '*'  
-	        snr_beam = np.abs(np.array([(n-val[lim].mean()) for n in
+	        snr_beam = (np.array([(n-val[lim].mean()) for n in
 		    val]).sum())/(sig*np.sqrt(W))
 	        S_beam = snr_beam*psr.temp*np.sqrt(W/(P-W))/(2*np.sqrt(poln*120*bandwidth))
 	        S_offset = np.exp((beam_cand.off/0.3)**2 / 1.5)*S_beam
@@ -793,7 +819,7 @@ for i in range(len(psr_tbl[y])):
 		        name_detect.append(psr.name)
 		    if not os.path.isdir(work_dir+'detection_plots'):     # Link relevant files in detection plot repository
 		        os.chdir(work_dir)
-		        sproc.call('mkdir detection_plots',shell=True)
+		        call('mkdir detection_plots',shell=True)
 		        os.chdir(psr.name+"_temp/")
 		    pfd_str = "detection_plots/guppi_%d_GBNCC%s_%s.pfd" \
 		        %(mjd,beam_cand.num,psr.name)
@@ -808,8 +834,8 @@ for i in range(len(psr_tbl[y])):
 			    check_n = 0.0
 			    for prof in best_prof_list:
 			        try:
-				    cs = float(sproc.Popen(["grep 'Reduced' %s | \
-				        awk '{print $5}'" %prof_file], stdout=sproc.PIPE, shell=True).communicate()[0])
+				    cs = float(Popen(["grep 'Reduced' %s | \
+				        awk '{print $5}'" %prof_file], stdout=PIPE, shell=True).communicate()[0])
 				    if cs > check_n:
 				        check_f = prof 
 			        except:
@@ -817,19 +843,19 @@ for i in range(len(psr_tbl[y])):
 			    if check_f != '':
 			        file_str = check_f[3:-10]
 		        os.chdir('%sdetection_plots' %work_dir)
-		        sproc.call('cp -fs %s%s*/g*%s*ps %s.ps'%(work_dir,psr.name,
+		        call('cp -fs %s%s*/g*%s*ps %s.ps'%(work_dir,psr.name,
 			    file_str,pfd_str.split('/')[1]), shell=True)
-		        sproc.call('cp -fs %s%s*/g*%s*prof %s.bestprof' %(work_dir,
+		        call('cp -fs %s%s*/g*%s*prof %s.bestprof' %(work_dir,
 			    psr.name,file_str,pfd_str.split('/')[1]),shell=True)
 		        os.chdir("%s%s_temp" %(work_dir,psr.name))
 		    if use_comp == 'zuul' and len(glob("%s%s*" %(renee_dir,pfd_str)))==0:
 		        os.chdir("%sdetection_plots/" %work_dir)
-		        sproc.call("ln -fs %s%s_temp/*%s*pfd ." %(work_dir,psr.name,beam_cand.num), shell=True)        
+		        call("ln -fs %s%s_temp/*%s*pfd ." %(work_dir,psr.name,beam_cand.num), shell=True)        
 		        os.chdir("%s%s_temp" %(work_dir,psr.name))
 		    elif use_comp == 'GB' and len(glob("%s%s*" %(renee_dir,pfd_str))) == 0:
-		        sproc.call("cp  gu*%s_%s*ps %sdetection_plots/"
+		        call("cp  gu*%s_%s*ps %sdetection_plots/"
 			    %(beam_cand.num,psr.name,work_dir), shell=True)
-		        sproc.call("cp  gu*%s_%s*prof %sdetection_plots/"
+		        call("cp  gu*%s_%s*prof %sdetection_plots/"
 			    %(beam_cand.num,psr.name,work_dir), shell=True)
 	        else:   					# In the case of a non-detection
 		    if snr_exp == '*':
